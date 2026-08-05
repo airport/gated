@@ -1031,38 +1031,42 @@ export function ContentLockerHome() {
       'div',
       { className: 'gated-shell' },
       el(
-        'main',
-        { className: 'gated-form' },
+        'div',
+        { className: 'gated-form-col' },
         el(
-          'div',
-          { className: 'gated-form__inner' },
-          el(
-            'nav',
-            { className: 'gated-nav', 'aria-label': 'Primary' },
-            ...NAV_ITEMS.map((item) =>
-              el(NavButton, {
-                key: item.id,
-                label: item.label,
-                Icon: item.Icon,
-                active: nav === item.id,
-                onClick: () => {
-                  setNav(item.id)
-                  if (item.id !== 'vault') setSelectedVaultId(null)
-                },
-              }),
-            ),
-          ),
+          'main',
+          { className: 'gated-form' },
           el(
             'div',
-            { className: 'gated-brand-row' },
+            { className: 'gated-form__inner' },
             el(
-              Text,
-              { size: '4', weight: 'bold', className: 'gated-logo' },
-              '[gated]',
+              'nav',
+              { className: 'gated-nav', 'aria-label': 'Primary' },
+              ...NAV_ITEMS.map((item) =>
+                el(NavButton, {
+                  key: item.id,
+                  label: item.label,
+                  Icon: item.Icon,
+                  active: nav === item.id,
+                  onClick: () => {
+                    setNav(item.id)
+                    if (item.id !== 'vault') setSelectedVaultId(null)
+                  },
+                }),
+              ),
             ),
-            el(Badge, { size: '1', variant: 'soft', color: 'amber' }, 'Beta'),
+            el(
+              'div',
+              { className: 'gated-brand-row' },
+              el(
+                Text,
+                { size: '4', weight: 'bold', className: 'gated-logo' },
+                '[gated]',
+              ),
+              el(Badge, { size: '1', variant: 'soft', color: 'amber' }, 'Beta'),
+            ),
+            pageContent,
           ),
-          pageContent,
         ),
         el('div', {
           className: 'gated-form__fade',
