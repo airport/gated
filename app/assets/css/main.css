@@ -89,10 +89,29 @@ body {
   margin-bottom: 1.25rem;
 }
 
+.gated-meta {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0.35rem 0 0.5rem;
+}
+
+.gated-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.gated-slug-hint {
+  margin-top: 0.15rem;
+}
+
+.gated-section-label {
+  margin-bottom: 0.15rem;
+}
+
 .gated-form__body {
   display: grid;
   gap: 1.25rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .gated-item {
@@ -212,9 +231,15 @@ body {
   margin-bottom: 0.1rem;
 }
 
+.gated-embed__slug {
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
 .gated-embed__copy {
   max-width: 18rem;
   color: rgba(255, 255, 255, 0.72) !important;
+  white-space: pre-wrap;
 }
 
 /* Extra actions scroll inside the panel; panel size stays locked to the column */

@@ -8,23 +8,23 @@ import {
   Badge,
   IconButton,
   TextField,
+  TextArea,
   Select,
   Trash16,
-  Lock20,
-  Youtube20,
-  Instagram20,
-  Twitter20,
-  Tiktok20,
-  Discord20,
+  LockFilled20,
+  YoutubeFilled20,
+  InstagramFilled20,
+  TwitterFilled20,
+  TiktokFilled20,
+  DiscordFilled20,
   Twitch20,
-  Facebook20,
-  Telegram20,
+  FacebookFilled20,
+  TelegramFilled20,
   Linkedin20,
   type ReactNode,
   type ComponentType,
 } from 'virtual:frosted-ui'
 import {
-  SOCIAL_PRESETS,
   getPreset,
   presetsByPlatform,
   resolveDestination,
@@ -42,14 +42,14 @@ const PLATFORM_ICONS: Record<
   PlatformId,
   ComponentType<{ className?: string }>
 > = {
-  youtube: Youtube20,
-  instagram: Instagram20,
-  x: Twitter20,
-  tiktok: Tiktok20,
-  discord: Discord20,
+  youtube: YoutubeFilled20,
+  instagram: InstagramFilled20,
+  x: TwitterFilled20,
+  tiktok: TiktokFilled20,
+  discord: DiscordFilled20,
   twitch: Twitch20,
-  facebook: Facebook20,
-  telegram: Telegram20,
+  facebook: FacebookFilled20,
+  telegram: TelegramFilled20,
   linkedin: Linkedin20,
 }
 
@@ -63,6 +63,15 @@ function el(
 
 function uid() {
   return `act_${Math.random().toString(36).slice(2, 9)}`
+}
+
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48)
 }
 
 const DEFAULT_ACTIONS: LockerAction[] = [
@@ -97,7 +106,22 @@ function BrandButton({
   )
 }
 
+function FieldLabel({ children }: { children: ReactNode }) {
+  return el(
+    Text,
+    { size: '1', weight: 'medium', color: 'gray', as: 'label' },
+    children,
+  )
+}
+
 export function ContentLockerHome() {
+  const [slug, setSlug] = useState('my-drop')
+  const [title, setTitle] = useState('Content locked')
+  const [description, setDescription] = useState(
+    'Complete a step below to unlock.',
+  )
+  const [slugTouched, setSlugTouched] = useState(false)
+
   const [actions, setActions] = useState<LockerAction[]>(DEFAULT_ACTIONS)
   const [pickerKey, setPickerKey] = useState(0)
   const groups = useMemo(() => presetsByPlatform(), [])
@@ -106,7 +130,6 @@ export function ContentLockerHome() {
   const addFromPreset = (presetId: string | null) => {
     if (!presetId || !getPreset(presetId)) return
     setActions((prev) => [...prev, { id: uid(), presetId, value: '' }])
-    // remount select so it clears after picking
     setPickerKey((k) => k + 1)
   }
 
@@ -122,6 +145,16 @@ export function ContentLockerHome() {
     )
   }
 
+  const onTitleChange = (value: string) => {
+    setTitle(value)
+    if (!slugTouched) setSlug(slugify(value) || 'locker')
+  }
+
+  const previewTitle = title.trim() || 'Content locked'
+  const previewDescription =
+    description.trim() || 'Complete a step below to unlock.'
+  const previewSlug = slugify(slug) || 'locker'
+
   return el(
     Theme,
     {
@@ -133,7 +166,6 @@ export function ContentLockerHome() {
     el(
       'div',
       { className: 'gated-shell' },
-      // LEFT — scrolls
       el(
         'main',
         { className: 'gated-form' },
@@ -144,11 +176,7 @@ export function ContentLockerHome() {
             'div',
             { className: 'gated-brand-row' },
             el(Text, { size: '4', weight: 'bold', className: 'gated-logo' }, '[gated]'),
-            el(
-              Badge,
-              { size: '1', variant: 'soft', color: 'amber' },
-              'Beta',
-            ),
+            el(Badge, { size: '1', variant: 'soft', color: 'amber' }, 'Beta'),
           ),
           el(
             Heading,
@@ -158,12 +186,80 @@ export function ContentLockerHome() {
           el(
             Text,
             { size: '2', color: 'gray', className: 'gated-lede' },
-            'Pick social unlock steps. Preview stays fixed on the right.',
+            'Set your locker details and social unlock steps.',
+          ),
+
+          el(
+            'div',
+            { className: 'gated-meta' },
+            el(
+              'div',
+              { className: 'gated-field' },
+              el(FieldLabel, null, 'Title'),
+              el(
+                TextField.Root,
+                { size: '3', variant: 'surface' },
+                el(TextField.Input, {
+                  value: title,
+                  placeholder: 'Content locked',
+                  onChange: (e: { target: { value: string } }) =>
+                    onTitleChange(e.target.value),
+                }),
+              ),
+            ),
+            el(
+              'div',
+              { className: 'gated-field' },
+              el(FieldLabel, null, 'Slug'),
+              el(
+                TextField.Root,
+                { size: '3', variant: 'surface' },
+                el(
+                  TextField.Slot,
+                  null,
+                  el(Text, { size: '2', color: 'gray' }, '/'),
+                ),
+                el(TextField.Input, {
+                  value: slug,
+                  placeholder: 'my-drop',
+                  onChange: (e: { target: { value: string } }) => {
+                    setSlugTouched(true)
+                    setSlug(e.target.value)
+                  },
+                  onBlur: () => setSlug(slugify(slug) || 'locker'),
+                }),
+              ),
+              el(
+                Text,
+                { size: '1', color: 'gray', className: 'gated-slug-hint' },
+                `gated.app/${previewSlug}`,
+              ),
+            ),
+            el(
+              'div',
+              { className: 'gated-field' },
+              el(FieldLabel, null, 'Description'),
+              el(TextArea, {
+                size: '3',
+                variant: 'surface',
+                value: description,
+                placeholder: 'Complete a step below to unlock.',
+                rows: 3,
+                resize: 'vertical',
+                onChange: (e: { target: { value: string } }) =>
+                  setDescription(e.target.value),
+              }),
+            ),
           ),
 
           el(
             'div',
             { className: 'gated-form__body' },
+            el(
+              Text,
+              { size: '2', weight: 'medium', className: 'gated-section-label' },
+              'Unlock steps',
+            ),
             ...actions.map((action, index) => {
               const preset = getPreset(action.presetId)
               if (!preset) return null
@@ -270,7 +366,6 @@ export function ContentLockerHome() {
         ),
       ),
 
-      // RIGHT — fixed size, no page scroll, panel centered
       el(
         'aside',
         { className: 'gated-embed', 'aria-label': 'Locker preview' },
@@ -286,7 +381,16 @@ export function ContentLockerHome() {
             el(
               'div',
               { className: 'gated-embed__hero' },
-              el('div', { className: 'gated-embed__icon' }, el(Lock20, null)),
+              el(
+                'div',
+                { className: 'gated-embed__icon' },
+                el(LockFilled20, null),
+              ),
+              el(
+                Text,
+                { size: '1', color: 'gray', className: 'gated-embed__slug' },
+                `/${previewSlug}`,
+              ),
               el(
                 Heading,
                 {
@@ -296,12 +400,12 @@ export function ContentLockerHome() {
                   align: 'center',
                   highContrast: true,
                 },
-                'Content locked',
+                previewTitle,
               ),
               el(
                 Text,
                 { size: '2', align: 'center', className: 'gated-embed__copy' },
-                'Complete a step below to unlock.',
+                previewDescription,
               ),
             ),
             el(
