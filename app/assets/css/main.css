@@ -9,30 +9,31 @@
 html,
 body,
 #__nuxt {
-  min-height: 100%;
   height: 100%;
+  min-height: 100%;
 }
 
 body {
   margin: 0;
   background: #0a0a0a;
   color: var(--gray-12, #eee);
+  overflow: hidden;
 }
 
 .gated-theme {
   display: block;
-  min-height: 100%;
   height: 100%;
+  min-height: 100%;
 }
 
-/* Full-bleed dark shell — no floating card, no blue page wash */
 .gated-shell {
-  min-height: 100vh;
-  height: 100%;
+  height: 100vh;
+  max-height: 100vh;
   width: 100%;
   display: grid;
   grid-template-columns: 1fr;
   background: #0a0a0a;
+  overflow: hidden;
 }
 
 @media (min-width: 900px) {
@@ -41,7 +42,7 @@ body {
   }
 }
 
-/* —— Left —— */
+/* —— Left: independent scroll —— */
 .gated-form {
   display: flex;
   flex-direction: column;
@@ -49,7 +50,11 @@ body {
   padding: clamp(2rem, 6vh, 4.5rem) clamp(1.5rem, 5vw, 4.5rem);
   box-sizing: border-box;
   background: #0a0a0a;
-  min-height: 100%;
+  height: 100%;
+  max-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .gated-form__inner {
@@ -57,13 +62,20 @@ body {
   gap: 0.65rem;
   max-width: 26rem;
   width: 100%;
-  margin: auto 0;
+  margin: 0;
+  padding-bottom: 1.5rem;
+}
+
+.gated-brand-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.35rem;
 }
 
 .gated-logo {
   letter-spacing: -0.03em;
   color: #fff;
-  margin-bottom: 0.35rem;
 }
 
 .gated-title {
@@ -85,40 +97,68 @@ body {
 
 .gated-item {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.55rem;
 }
 
 .gated-item__bar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  min-height: 1.5rem;
+  gap: 0.75rem;
+}
+
+.gated-item__meta {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.gated-item__platform-icon {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  color: var(--gray-11);
+}
+
+.gated-item__titles {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
 }
 
 .gated-input {
   width: 100%;
 }
 
-.gated-add {
-  width: fit-content;
-  display: inline-flex !important;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: 0.15rem;
+.gated-picker {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.25rem;
+}
+
+.gated-picker__trigger {
+  width: 100%;
 }
 
 .gated-form__footer {
   padding-top: 1.5rem;
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(180deg, transparent, #0a0a0a 35%);
+  padding-bottom: 0.25rem;
 }
 
-/* —— Right: inset panel padded inside the black shell —— */
+/* —— Right: no shell scroll; fixed centered preview —— */
 .gated-embed {
   display: grid;
+  place-items: center;
   box-sizing: border-box;
   background: #0a0a0a;
-  /* Padding creates the embedded inset look from the reference */
+  height: 100%;
+  max-height: 100vh;
+  overflow: hidden;
   padding: clamp(1rem, 2.5vw, 1.75rem);
-  min-height: 420px;
+  min-height: 0;
 }
 
 .gated-embed__panel {
@@ -127,27 +167,37 @@ body {
   background-position: center;
   position: relative;
   overflow: hidden;
-  width: 100%;
-  height: 100%;
-  min-height: 360px;
+  width: min(100%, 400px);
+  height: min(100%, 640px);
+  max-height: calc(100vh - 2 * clamp(1rem, 2.5vw, 1.75rem));
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  display: grid;
 }
 
 .gated-embed__content {
   position: relative;
   z-index: 1;
   height: 100%;
+  min-height: 0;
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   align-content: center;
   justify-items: center;
-  gap: 0.7rem;
-  padding: clamp(1.5rem, 4vw, 2.5rem);
+  gap: 1rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
   box-sizing: border-box;
   background: linear-gradient(
     180deg,
     rgba(7, 10, 18, 0.12) 0%,
-    rgba(7, 10, 18, 0.52) 100%
+    rgba(7, 10, 18, 0.55) 100%
   );
+}
+
+.gated-embed__hero {
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+  flex-shrink: 0;
 }
 
 .gated-embed__icon {
@@ -159,7 +209,7 @@ body {
   color: #fff;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.1rem;
 }
 
 .gated-embed__copy {
@@ -167,13 +217,42 @@ body {
   color: rgba(255, 255, 255, 0.72) !important;
 }
 
+/* Buttons scroll inside the fixed panel only — right column itself never grows */
 .gated-embed__actions {
   display: grid;
   gap: 0.55rem;
-  width: min(100%, 17rem);
-  margin-top: 0.9rem;
+  width: min(100%, 17.5rem);
+  align-content: start;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 0.15rem;
+  margin-top: 0.25rem;
 }
 
-.gated-embed__cta {
+.gated-brand-btn {
   width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: 0;
+  border-radius: 0.7rem;
+  padding: 0.8rem 1rem;
+  font: 500 14px/1.2 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  cursor: pointer;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.gated-brand-btn:hover {
+  filter: brightness(1.06);
+}
+
+.gated-brand-btn:active {
+  transform: translateY(1px);
+}
+
+.gated-brand-btn__icon {
+  flex-shrink: 0;
 }

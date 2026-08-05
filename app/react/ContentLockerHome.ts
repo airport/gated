@@ -1,24 +1,56 @@
 import {
   createElement,
+  useMemo,
   useState,
   Theme,
   Heading,
   Text,
-  Button,
+  Badge,
   IconButton,
   TextField,
-  Separator,
-  Plus16,
+  Select,
   Trash16,
-  Link16,
   Lock20,
+  Youtube20,
+  Instagram20,
+  Twitter20,
+  Tiktok20,
+  Discord20,
+  Twitch20,
+  Facebook20,
+  Telegram20,
+  Linkedin20,
   type ReactNode,
+  type ComponentType,
 } from 'virtual:frosted-ui'
+import {
+  SOCIAL_PRESETS,
+  getPreset,
+  presetsByPlatform,
+  resolveDestination,
+  type PlatformId,
+  type SocialPreset,
+} from './socialPresets'
 
-type LockerButton = {
+type LockerAction = {
   id: string
-  label: string
-  url: string
+  presetId: string
+  value: string
+}
+
+const PLATFORM_ICONS: Record<
+  PlatformId,
+  ComponentType<{ className?: string }>
+> = {
+  youtube: Youtube20,
+  instagram: Instagram20,
+  x: Twitter20,
+  tiktok: Tiktok20,
+  discord: Discord20,
+  twitch: Twitch20,
+  facebook: Facebook20,
+  telegram: Telegram20,
+  linkedin: Linkedin20,
 }
 
 function el(
@@ -30,38 +62,63 @@ function el(
 }
 
 function uid() {
-  return `btn_${Math.random().toString(36).slice(2, 9)}`
+  return `act_${Math.random().toString(36).slice(2, 9)}`
 }
 
-const DEFAULT_BUTTONS: LockerButton[] = [
-  { id: uid(), label: 'Join Discord', url: 'https://discord.gg/' },
-  { id: uid(), label: 'Follow on X', url: 'https://x.com/' },
+const DEFAULT_ACTIONS: LockerAction[] = [
+  { id: uid(), presetId: 'youtube:subscribe', value: '' },
+  { id: uid(), presetId: 'discord:join', value: '' },
 ]
 
-/** Preview panel / published locker canvas only — not the page chrome. */
 const PANEL_CANVAS =
   'radial-gradient(120% 80% at 50% 0%, #3b82f6 0%, #1e3a8a 34%, #0b1224 70%, #070a12 100%)'
 
-export function ContentLockerHome() {
-  const [buttons, setButtons] = useState<LockerButton[]>(DEFAULT_BUTTONS)
-  const canRemove = buttons.length > 1
+function BrandButton({
+  preset,
+  onClick,
+}: {
+  preset: SocialPreset
+  onClick: () => void
+}) {
+  const Icon = PLATFORM_ICONS[preset.platformId]
+  return el(
+    'button',
+    {
+      type: 'button',
+      className: 'gated-brand-btn',
+      style: {
+        background: preset.brand,
+        color: preset.brandText ?? '#ffffff',
+      },
+      onClick,
+    },
+    el(Icon, { className: 'gated-brand-btn__icon' }),
+    el('span', null, preset.label),
+  )
+}
 
-  const addButton = () => {
-    setButtons((prev) => [
-      ...prev,
-      { id: uid(), label: 'New button', url: 'https://' },
-    ])
+export function ContentLockerHome() {
+  const [actions, setActions] = useState<LockerAction[]>(DEFAULT_ACTIONS)
+  const [pickerKey, setPickerKey] = useState(0)
+  const groups = useMemo(() => presetsByPlatform(), [])
+  const canRemove = actions.length > 1
+
+  const addFromPreset = (presetId: string | null) => {
+    if (!presetId || !getPreset(presetId)) return
+    setActions((prev) => [...prev, { id: uid(), presetId, value: '' }])
+    // remount select so it clears after picking
+    setPickerKey((k) => k + 1)
   }
 
-  const removeButton = (id: string) => {
-    setButtons((prev) =>
-      prev.length <= 1 ? prev : prev.filter((b) => b.id !== id),
+  const removeAction = (id: string) => {
+    setActions((prev) =>
+      prev.length <= 1 ? prev : prev.filter((a) => a.id !== id),
     )
   }
 
-  const updateButton = (id: string, patch: Partial<LockerButton>) => {
-    setButtons((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, ...patch } : b)),
+  const updateValue = (id: string, value: string) => {
+    setActions((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, value } : a)),
     )
   }
 
@@ -76,14 +133,23 @@ export function ContentLockerHome() {
     el(
       'div',
       { className: 'gated-shell' },
-      // LEFT
+      // LEFT — scrolls
       el(
         'main',
         { className: 'gated-form' },
         el(
           'div',
           { className: 'gated-form__inner' },
-          el(Text, { size: '4', weight: 'bold', className: 'gated-logo' }, 'gated'),
+          el(
+            'div',
+            { className: 'gated-brand-row' },
+            el(Text, { size: '4', weight: 'bold', className: 'gated-logo' }, '[gated]'),
+            el(
+              Badge,
+              { size: '1', variant: 'soft', color: 'amber' },
+              'Beta',
+            ),
+          ),
           el(
             Heading,
             { as: 'h1', size: '8', weight: 'bold', className: 'gated-title' },
@@ -92,23 +158,36 @@ export function ContentLockerHome() {
           el(
             Text,
             { size: '2', color: 'gray', className: 'gated-lede' },
-            'Build unlock buttons for your content locker. Preview updates on the right.',
+            'Pick social unlock steps. Preview stays fixed on the right.',
           ),
 
           el(
             'div',
             { className: 'gated-form__body' },
-            ...buttons.map((button, index) =>
-              el(
+            ...actions.map((action, index) => {
+              const preset = getPreset(action.presetId)
+              if (!preset) return null
+              const Icon = PLATFORM_ICONS[preset.platformId]
+              return el(
                 'div',
-                { key: button.id, className: 'gated-item' },
+                { key: action.id, className: 'gated-item' },
                 el(
                   'div',
                   { className: 'gated-item__bar' },
                   el(
-                    Text,
-                    { size: '1', weight: 'medium', color: 'gray' },
-                    `Button ${index + 1}`,
+                    'div',
+                    { className: 'gated-item__meta' },
+                    el(Icon, { className: 'gated-item__platform-icon' }),
+                    el(
+                      'div',
+                      { className: 'gated-item__titles' },
+                      el(
+                        Text,
+                        { size: '1', color: 'gray' },
+                        `${preset.platform} · Step ${index + 1}`,
+                      ),
+                      el(Text, { size: '2', weight: 'medium' }, preset.label),
+                    ),
                   ),
                   el(
                     IconButton,
@@ -117,8 +196,8 @@ export function ContentLockerHome() {
                       variant: 'ghost',
                       color: 'gray',
                       disabled: !canRemove,
-                      'aria-label': `Remove button ${index + 1}`,
-                      onClick: () => removeButton(button.id),
+                      'aria-label': `Remove ${preset.label}`,
+                      onClick: () => removeAction(action.id),
                     },
                     el(Trash16, null),
                   ),
@@ -126,40 +205,60 @@ export function ContentLockerHome() {
                 el(
                   TextField.Root,
                   { size: '3', variant: 'surface', className: 'gated-input' },
+                  preset.prefix
+                    ? el(
+                        TextField.Slot,
+                        null,
+                        el(Text, { size: '2', color: 'gray' }, preset.prefix),
+                      )
+                    : null,
                   el(TextField.Input, {
-                    value: button.label,
-                    placeholder: 'Button label',
+                    value: action.value,
+                    placeholder: preset.placeholder,
+                    inputMode: preset.inputKind === 'url' ? 'url' : 'text',
                     onChange: (e: { target: { value: string } }) =>
-                      updateButton(button.id, { label: e.target.value }),
+                      updateValue(action.id, e.target.value),
                   }),
                 ),
-                el(
-                  TextField.Root,
-                  { size: '3', variant: 'surface', className: 'gated-input' },
-                  el(TextField.Slot, null, el(Link16, null)),
-                  el(TextField.Input, {
-                    value: button.url,
-                    placeholder: 'https://destination.url',
-                    inputMode: 'url',
-                    onChange: (e: { target: { value: string } }) =>
-                      updateButton(button.id, { url: e.target.value }),
-                  }),
-                ),
-              ),
-            ),
+              )
+            }),
 
             el(
-              Button,
-              {
-                size: '3',
-                variant: 'soft',
-                color: 'gray',
-                highContrast: true,
-                className: 'gated-add',
-                onClick: addButton,
-              },
-              el(Plus16, null),
-              el('span', null, 'Add button'),
+              'div',
+              { key: `picker-${pickerKey}`, className: 'gated-picker' },
+              el(
+                Text,
+                { size: '1', weight: 'medium', color: 'gray' },
+                'Add social action',
+              ),
+              el(
+                Select.Root,
+                {
+                  onValueChange: (value: string) => addFromPreset(value),
+                },
+                el(Select.Trigger, {
+                  placeholder: 'Choose platform action…',
+                  className: 'gated-picker__trigger',
+                }),
+                el(
+                  Select.Content,
+                  { position: 'popper' },
+                  ...groups.flatMap(([platform, presets]) => [
+                    el(
+                      Select.Group,
+                      { key: platform },
+                      el(Select.GroupLabel, null, platform),
+                      ...presets.map((preset) =>
+                        el(
+                          Select.Item,
+                          { key: preset.id, value: preset.id },
+                          preset.label,
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
             ),
           ),
         ),
@@ -171,7 +270,7 @@ export function ContentLockerHome() {
         ),
       ),
 
-      // RIGHT — inset panel padded inside the full-bleed shell
+      // RIGHT — fixed size, no page scroll, panel centered
       el(
         'aside',
         { className: 'gated-embed', 'aria-label': 'Locker preview' },
@@ -184,43 +283,43 @@ export function ContentLockerHome() {
           el(
             'div',
             { className: 'gated-embed__content' },
-            el('div', { className: 'gated-embed__icon' }, el(Lock20, null)),
             el(
-              Heading,
-              {
-                as: 'h2',
-                size: '6',
-                weight: 'bold',
-                align: 'center',
-                highContrast: true,
-              },
-              'Content locked',
-            ),
-            el(
-              Text,
-              { size: '2', align: 'center', className: 'gated-embed__copy' },
-              'Complete a step below to unlock.',
+              'div',
+              { className: 'gated-embed__hero' },
+              el('div', { className: 'gated-embed__icon' }, el(Lock20, null)),
+              el(
+                Heading,
+                {
+                  as: 'h2',
+                  size: '6',
+                  weight: 'bold',
+                  align: 'center',
+                  highContrast: true,
+                },
+                'Content locked',
+              ),
+              el(
+                Text,
+                { size: '2', align: 'center', className: 'gated-embed__copy' },
+                'Complete a step below to unlock.',
+              ),
             ),
             el(
               'div',
               { className: 'gated-embed__actions' },
-              ...buttons.map((button) =>
-                el(
-                  Button,
-                  {
-                    key: button.id,
-                    size: '3',
-                    variant: 'solid',
-                    color: 'blue',
-                    className: 'gated-embed__cta',
-                    onClick: () => {
-                      if (!button.url) return
-                      window.open(button.url, '_blank', 'noopener,noreferrer')
-                    },
+              ...actions.map((action) => {
+                const preset = getPreset(action.presetId)
+                if (!preset) return null
+                return el(BrandButton, {
+                  key: action.id,
+                  preset,
+                  onClick: () => {
+                    const href = resolveDestination(preset, action.value)
+                    if (!href) return
+                    window.open(href, '_blank', 'noopener,noreferrer')
                   },
-                  button.label || 'Untitled',
-                ),
-              ),
+                })
+              }),
             ),
           ),
         ),
