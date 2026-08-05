@@ -79,7 +79,26 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  margin-bottom: 0.35rem;
+  margin-bottom: 1.35rem;
+}
+
+.gated-tabs {
+  width: 100%;
+  display: grid;
+  gap: 1.65rem;
+}
+
+.gated-tabs__list {
+  width: 100%;
+}
+
+.gated-tabs__panel {
+  outline: none;
+}
+
+.gated-placeholder {
+  display: grid;
+  gap: 0.45rem;
 }
 
 .gated-logo {
@@ -89,7 +108,7 @@ body {
 
 .gated-title {
   letter-spacing: -0.035em;
-  margin-top: 0.35rem;
+  margin-top: 0;
 }
 
 .gated-lede {

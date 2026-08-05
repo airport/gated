@@ -10,6 +10,7 @@ import {
   TextField,
   TextArea,
   Select,
+  Tabs,
   Trash16,
   LockFilled20,
   LinkFilled20,
@@ -138,6 +139,19 @@ function DestinationButton({
   )
 }
 
+function PlaceholderPanel({ title, copy }: { title: string; copy: string }) {
+  return el(
+    'div',
+    { className: 'gated-placeholder' },
+    el(
+      Heading,
+      { as: 'h1', size: '7', weight: 'bold', className: 'gated-title' },
+      title,
+    ),
+    el(Text, { size: '2', color: 'gray', className: 'gated-lede' }, copy),
+  )
+}
+
 function FieldLabel({ children }: { children: ReactNode }) {
   return el(
     Text,
@@ -215,230 +229,293 @@ export function ContentLockerHome() {
             el(Badge, { size: '1', variant: 'soft', color: 'amber' }, 'Beta'),
           ),
           el(
-            Heading,
-            { as: 'h1', size: '8', weight: 'bold', className: 'gated-title' },
-            'Welcome',
-          ),
-          el(
-            Text,
-            { size: '2', color: 'gray', className: 'gated-lede' },
-            'Set your locker details and social unlock steps.',
-          ),
-
-          el(
-            'div',
-            { className: 'gated-meta' },
+            Tabs.Root,
+            {
+              defaultValue: 'home',
+              className: 'gated-tabs',
+            },
             el(
-              'div',
-              { className: 'gated-field' },
-              el(FieldLabel, null, 'Title'),
-              el(
-                TextField.Root,
-                { size: '3', variant: 'surface' },
-                el(TextField.Input, {
-                  value: title,
-                  placeholder: 'Content locked',
-                  onChange: (e: { target: { value: string } }) =>
-                    onTitleChange(e.target.value),
-                }),
-              ),
+              Tabs.List,
+              { size: '2', className: 'gated-tabs__list' },
+              el(Tabs.Trigger, { value: 'home' }, 'Home'),
+              el(Tabs.Trigger, { value: 'vault' }, 'Vault'),
+              el(Tabs.Trigger, { value: 'payouts' }, 'Payouts'),
+              el(Tabs.Trigger, { value: 'settings' }, 'Settings'),
             ),
             el(
-              'div',
-              { className: 'gated-field' },
-              el(FieldLabel, null, 'Slug'),
+              Tabs.Content,
+              { value: 'home', className: 'gated-tabs__panel', keepMounted: true },
               el(
-                TextField.Root,
-                { size: '3', variant: 'surface' },
-                el(
-                  TextField.Slot,
-                  null,
-                  el(Text, { size: '2', color: 'gray' }, '/'),
-                ),
-                el(TextField.Input, {
-                  value: slug,
-                  placeholder: 'my-drop',
-                  onChange: (e: { target: { value: string } }) => {
-                    setSlugTouched(true)
-                    setSlug(e.target.value)
-                  },
-                  onBlur: () => setSlug(slugify(slug) || 'locker'),
-                }),
+                Heading,
+                { as: 'h1', size: '8', weight: 'bold', className: 'gated-title' },
+                'Welcome',
               ),
               el(
                 Text,
-                { size: '1', color: 'gray', className: 'gated-slug-hint' },
-                `gated.to/${previewSlug}`,
+                { size: '2', color: 'gray', className: 'gated-lede' },
+                'Set your locker details and social unlock steps.',
+              ),
+
+              el(
+                'div',
+                { className: 'gated-meta' },
+                el(
+                  'div',
+                  { className: 'gated-field' },
+                  el(FieldLabel, null, 'Title'),
+                  el(
+                    TextField.Root,
+                    { size: '3', variant: 'surface' },
+                    el(TextField.Input, {
+                      value: title,
+                      placeholder: 'Content locked',
+                      onChange: (e: { target: { value: string } }) =>
+                        onTitleChange(e.target.value),
+                    }),
+                  ),
+                ),
+                el(
+                  'div',
+                  { className: 'gated-field' },
+                  el(FieldLabel, null, 'Slug'),
+                  el(
+                    TextField.Root,
+                    { size: '3', variant: 'surface' },
+                    el(
+                      TextField.Slot,
+                      null,
+                      el(Text, { size: '2', color: 'gray' }, '/'),
+                    ),
+                    el(TextField.Input, {
+                      value: slug,
+                      placeholder: 'my-drop',
+                      onChange: (e: { target: { value: string } }) => {
+                        setSlugTouched(true)
+                        setSlug(e.target.value)
+                      },
+                      onBlur: () => setSlug(slugify(slug) || 'locker'),
+                    }),
+                  ),
+                  el(
+                    Text,
+                    { size: '1', color: 'gray', className: 'gated-slug-hint' },
+                    `gated.to/${previewSlug}`,
+                  ),
+                ),
+                el(
+                  'div',
+                  { className: 'gated-field' },
+                  el(FieldLabel, null, 'Description'),
+                  el(TextArea, {
+                    size: '3',
+                    variant: 'surface',
+                    value: description,
+                    placeholder: 'Complete a step below to unlock.',
+                    rows: 3,
+                    resize: 'vertical',
+                    onChange: (e: { target: { value: string } }) =>
+                      setDescription(e.target.value),
+                  }),
+                ),
+                el(
+                  'div',
+                  { className: 'gated-field' },
+                  el(FieldLabel, null, 'Destination button'),
+                  el(
+                    TextField.Root,
+                    { size: '3', variant: 'surface' },
+                    el(TextField.Input, {
+                      value: destinationLabel,
+                      placeholder: 'Continue',
+                      onChange: (e: { target: { value: string } }) =>
+                        setDestinationLabel(e.target.value),
+                    }),
+                  ),
+                  el(
+                    TextField.Root,
+                    { size: '3', variant: 'surface', className: 'gated-input' },
+                    el(
+                      TextField.Slot,
+                      null,
+                      el(LinkFilled20, { className: 'gated-field-icon' }),
+                    ),
+                    el(TextField.Input, {
+                      value: destinationUrl,
+                      placeholder: 'https://example.com/reward',
+                      inputMode: 'url',
+                      onChange: (e: { target: { value: string } }) =>
+                        setDestinationUrl(e.target.value),
+                    }),
+                  ),
+                  el(
+                    Text,
+                    { size: '1', color: 'gray', className: 'gated-slug-hint' },
+                    'Shown after unlock steps — opens the reward URL.',
+                  ),
+                ),
+              ),
+
+              el(
+                'div',
+                { className: 'gated-form__body' },
+                el(
+                  Text,
+                  {
+                    size: '2',
+                    weight: 'medium',
+                    className: 'gated-section-label',
+                  },
+                  'Unlock steps',
+                ),
+                ...actions.map((action, index) => {
+                  const preset = getPreset(action.presetId)
+                  if (!preset) return null
+                  const Icon = PLATFORM_ICONS[preset.platformId]
+                  return el(
+                    'div',
+                    { key: action.id, className: 'gated-item' },
+                    el(
+                      'div',
+                      { className: 'gated-item__bar' },
+                      el(
+                        'div',
+                        { className: 'gated-item__meta' },
+                        el(Icon, {
+                          className: 'gated-item__platform-icon',
+                          style: { color: platformAccent(preset) },
+                        }),
+                        el(
+                          'div',
+                          { className: 'gated-item__titles' },
+                          el(
+                            Text,
+                            { size: '1', color: 'gray' },
+                            `${preset.platform} · Step ${index + 1}`,
+                          ),
+                          el(
+                            Text,
+                            { size: '2', weight: 'medium' },
+                            preset.label,
+                          ),
+                        ),
+                      ),
+                      el(
+                        IconButton,
+                        {
+                          size: '1',
+                          variant: 'ghost',
+                          color: 'gray',
+                          disabled: !canRemove,
+                          'aria-label': `Remove ${preset.label}`,
+                          onClick: () => removeAction(action.id),
+                        },
+                        el(Trash16, null),
+                      ),
+                    ),
+                    el(
+                      TextField.Root,
+                      {
+                        size: '3',
+                        variant: 'surface',
+                        className: 'gated-input',
+                      },
+                      preset.prefix
+                        ? el(
+                            TextField.Slot,
+                            null,
+                            el(
+                              Text,
+                              { size: '2', color: 'gray' },
+                              preset.prefix,
+                            ),
+                          )
+                        : null,
+                      el(TextField.Input, {
+                        value: action.value,
+                        placeholder: preset.placeholder,
+                        inputMode:
+                          preset.inputKind === 'url' ? 'url' : 'text',
+                        onChange: (e: { target: { value: string } }) =>
+                          updateValue(action.id, e.target.value),
+                      }),
+                    ),
+                  )
+                }),
+
+                el(
+                  'div',
+                  { key: `picker-${pickerKey}`, className: 'gated-picker' },
+                  el(
+                    Text,
+                    { size: '1', weight: 'medium', color: 'gray' },
+                    'Add social action',
+                  ),
+                  el(
+                    Select.Root,
+                    {
+                      onValueChange: (value: string) => addFromPreset(value),
+                    },
+                    el(Select.Trigger, {
+                      placeholder: 'Choose platform action…',
+                      className: 'gated-picker__trigger',
+                    }),
+                    el(
+                      Select.Content,
+                      {
+                        position: 'popper',
+                        className: 'gated-select-content',
+                      },
+                      ...groups.flatMap(([platform, presets]) => [
+                        el(
+                          Select.Group,
+                          { key: platform },
+                          el(Select.GroupLabel, null, platform),
+                          ...presets.map((preset) => {
+                            const Icon = PLATFORM_ICONS[preset.platformId]
+                            return el(
+                              Select.Item,
+                              { key: preset.id, value: preset.id },
+                              el(
+                                'span',
+                                { className: 'gated-select-item' },
+                                el(Icon, {
+                                  className: 'gated-select-item__icon',
+                                  style: { color: platformAccent(preset) },
+                                }),
+                                el('span', null, preset.label),
+                              ),
+                            )
+                          }),
+                        ),
+                      ]),
+                    ),
+                  ),
+                ),
               ),
             ),
             el(
-              'div',
-              { className: 'gated-field' },
-              el(FieldLabel, null, 'Description'),
-              el(TextArea, {
-                size: '3',
-                variant: 'surface',
-                value: description,
-                placeholder: 'Complete a step below to unlock.',
-                rows: 3,
-                resize: 'vertical',
-                onChange: (e: { target: { value: string } }) =>
-                  setDescription(e.target.value),
+              Tabs.Content,
+              { value: 'vault', className: 'gated-tabs__panel' },
+              el(PlaceholderPanel, {
+                title: 'Vault',
+                copy: 'Saved lockers and assets will land here.',
               }),
             ),
             el(
-              'div',
-              { className: 'gated-field' },
-              el(FieldLabel, null, 'Destination button'),
-              el(
-                TextField.Root,
-                { size: '3', variant: 'surface' },
-                el(TextField.Input, {
-                  value: destinationLabel,
-                  placeholder: 'Continue',
-                  onChange: (e: { target: { value: string } }) =>
-                    setDestinationLabel(e.target.value),
-                }),
-              ),
-              el(
-                TextField.Root,
-                { size: '3', variant: 'surface', className: 'gated-input' },
-                el(
-                  TextField.Slot,
-                  null,
-                  el(LinkFilled20, { className: 'gated-field-icon' }),
-                ),
-                el(TextField.Input, {
-                  value: destinationUrl,
-                  placeholder: 'https://example.com/reward',
-                  inputMode: 'url',
-                  onChange: (e: { target: { value: string } }) =>
-                    setDestinationUrl(e.target.value),
-                }),
-              ),
-              el(
-                Text,
-                { size: '1', color: 'gray', className: 'gated-slug-hint' },
-                'Shown after unlock steps — opens the reward URL.',
-              ),
+              Tabs.Content,
+              { value: 'payouts', className: 'gated-tabs__panel' },
+              el(PlaceholderPanel, {
+                title: 'Payouts',
+                copy: 'Earnings and payout settings will land here.',
+              }),
             ),
-          ),
-
-          el(
-            'div',
-            { className: 'gated-form__body' },
             el(
-              Text,
-              { size: '2', weight: 'medium', className: 'gated-section-label' },
-              'Unlock steps',
-            ),
-            ...actions.map((action, index) => {
-              const preset = getPreset(action.presetId)
-              if (!preset) return null
-              const Icon = PLATFORM_ICONS[preset.platformId]
-              return el(
-                'div',
-                { key: action.id, className: 'gated-item' },
-                el(
-                  'div',
-                  { className: 'gated-item__bar' },
-                  el(
-                    'div',
-                    { className: 'gated-item__meta' },
-                    el(Icon, {
-                      className: 'gated-item__platform-icon',
-                      style: { color: platformAccent(preset) },
-                    }),
-                    el(
-                      'div',
-                      { className: 'gated-item__titles' },
-                      el(
-                        Text,
-                        { size: '1', color: 'gray' },
-                        `${preset.platform} · Step ${index + 1}`,
-                      ),
-                      el(Text, { size: '2', weight: 'medium' }, preset.label),
-                    ),
-                  ),
-                  el(
-                    IconButton,
-                    {
-                      size: '1',
-                      variant: 'ghost',
-                      color: 'gray',
-                      disabled: !canRemove,
-                      'aria-label': `Remove ${preset.label}`,
-                      onClick: () => removeAction(action.id),
-                    },
-                    el(Trash16, null),
-                  ),
-                ),
-                el(
-                  TextField.Root,
-                  { size: '3', variant: 'surface', className: 'gated-input' },
-                  preset.prefix
-                    ? el(
-                        TextField.Slot,
-                        null,
-                        el(Text, { size: '2', color: 'gray' }, preset.prefix),
-                      )
-                    : null,
-                  el(TextField.Input, {
-                    value: action.value,
-                    placeholder: preset.placeholder,
-                    inputMode: preset.inputKind === 'url' ? 'url' : 'text',
-                    onChange: (e: { target: { value: string } }) =>
-                      updateValue(action.id, e.target.value),
-                  }),
-                ),
-              )
-            }),
-
-            el(
-              'div',
-              { key: `picker-${pickerKey}`, className: 'gated-picker' },
-              el(
-                Text,
-                { size: '1', weight: 'medium', color: 'gray' },
-                'Add social action',
-              ),
-              el(
-                Select.Root,
-                {
-                  onValueChange: (value: string) => addFromPreset(value),
-                },
-                el(Select.Trigger, {
-                  placeholder: 'Choose platform action…',
-                  className: 'gated-picker__trigger',
-                }),
-                el(
-                  Select.Content,
-                  { position: 'popper', className: 'gated-select-content' },
-                  ...groups.flatMap(([platform, presets]) => [
-                    el(
-                      Select.Group,
-                      { key: platform },
-                      el(Select.GroupLabel, null, platform),
-                      ...presets.map((preset) => {
-                        const Icon = PLATFORM_ICONS[preset.platformId]
-                        return el(
-                          Select.Item,
-                          { key: preset.id, value: preset.id },
-                          el(
-                            'span',
-                            { className: 'gated-select-item' },
-                            el(Icon, {
-                              className: 'gated-select-item__icon',
-                              style: { color: platformAccent(preset) },
-                            }),
-                            el('span', null, preset.label),
-                          ),
-                        )
-                      }),
-                    ),
-                  ]),
-                ),
-              ),
+              Tabs.Content,
+              { value: 'settings', className: 'gated-tabs__panel' },
+              el(PlaceholderPanel, {
+                title: 'Settings',
+                copy: 'Account and workspace settings will land here.',
+              }),
             ),
           ),
         ),
