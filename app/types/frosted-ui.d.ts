@@ -61,5 +61,7 @@ declare module 'virtual:frosted-ui' {
     Lock24,
     Globe16,
     Globe20,
+    Pencil16,
+    ChevronRight16,
   } from '@frosted-ui/icons'
 }
