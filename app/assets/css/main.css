@@ -472,14 +472,20 @@ body {
 
 .gated-vault-table .fui-TableRootTable {
   width: 100%;
+  table-layout: auto;
   border-collapse: collapse;
+}
+
+.gated-vault-table .fui-TableRow {
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .gated-vault-table .fui-TableColumnHeaderCell,
 .gated-vault-table .fui-TableCell,
 .gated-vault-table .fui-TableRowHeaderCell {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 0;
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 .gated-vault-table .fui-TableHeader .fui-TableColumnHeaderCell {

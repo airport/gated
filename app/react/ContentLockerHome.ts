@@ -419,7 +419,11 @@ function ActionTip({
   label: string
   children: ReactElement
 }) {
-  return el(Tooltip, { content: label, side: 'top', delay: 180 }, children)
+  return el(
+    Tooltip,
+    { content: label, side: 'top', delay: 120, closeOnClick: true },
+    children,
+  )
 }
 
 function StatusBadge({
@@ -672,7 +676,29 @@ export function ContentLockerHome() {
   const [slugTouched, setSlugTouched] = useState(false)
   const [actions, setActions] = useState<LockerAction[]>(freshActions)
   const [pickerKey, setPickerKey] = useState(0)
-  const [vault, setVault] = useState<VaultLink[]>([])
+  const [vault, setVault] = useState<VaultLink[]>(() => {
+    const series = makeSeries()
+    const views = series.reduce((sum, d) => sum + d.views, 0)
+    const clicks = series.reduce((sum, d) => sum + d.clicks, 0)
+    return [{
+      id: uid('lnk'),
+      slug: 'premium-content',
+      title: 'Premium Content Access',
+      description: 'Unlock exclusive content by following on social media',
+      destinationLabel: 'View Content',
+      destinationUrl: 'https://example.com/premium',
+      actions: [
+        { id: uid('act'), presetId: 'youtube:subscribe', value: 'mychannel' },
+        { id: uid('act'), presetId: 'discord:join', value: 'discord.gg/myserver' },
+      ],
+      createdAt: Date.now() - 86400000,
+      active: true,
+      views,
+      clicks,
+      unlocks: Math.max(1, Math.round(clicks * 0.62)),
+      series,
+    }]
+  })
   const [editingId, setEditingId] = useState<string | null>(null)
   const [selectedVaultId, setSelectedVaultId] = useState<string | null>(null)
   const [createFlash, setCreateFlash] = useState('')
@@ -762,7 +788,7 @@ export function ContentLockerHome() {
         series,
       }
       setVault((prev) => [link, ...prev])
-      setSelectedVaultId(link.id)
+      setSelectedVaultId(null)
       setCreateFlash('Added to Vault')
     }
 
