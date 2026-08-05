@@ -46,7 +46,7 @@ body {
 .gated-form {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   padding: clamp(2rem, 6vh, 4.5rem) clamp(1.5rem, 5vw, 4.5rem);
   box-sizing: border-box;
@@ -73,7 +73,27 @@ body {
   max-width: 26rem;
   width: 100%;
   margin: 0 auto;
-  padding-bottom: 1.5rem;
+  padding-bottom: 2.5rem;
+}
+
+/* Bottom fade over scrollable content */
+.gated-form::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  display: block;
+  width: 100%;
+  max-width: 26rem;
+  height: 2.75rem;
+  margin-top: -2.75rem;
+  pointer-events: none;
+  z-index: 4;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 10, 0) 0%,
+    rgba(10, 10, 10, 0.72) 55%,
+    #0a0a0a 100%
+  );
 }
 
 .gated-nav {
