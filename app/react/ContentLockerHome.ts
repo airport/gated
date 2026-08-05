@@ -567,6 +567,10 @@ export function ContentLockerHome() {
           ),
           pageContent,
         ),
+        el('div', {
+          className: 'gated-form__fade',
+          'aria-hidden': true,
+        }),
       ),
 
       el(

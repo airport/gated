@@ -76,12 +76,9 @@ body {
   padding-bottom: 2.5rem;
 }
 
-/* Bottom fade over scrollable content */
-.gated-form::after {
-  content: '';
+.gated-form__fade {
   position: sticky;
   bottom: 0;
-  display: block;
   width: 100%;
   max-width: 26rem;
   height: 2.75rem;
