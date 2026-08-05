@@ -35,3 +35,10 @@ onBeforeUnmount(() => {
 <template>
   <div ref="host" class="react-island" />
 </template>
+
+<style scoped>
+.react-island {
+  min-height: 100vh;
+  height: 100%;
+}
+</style>

@@ -26,6 +26,6 @@ onMounted(async () => {
 <style scoped>
 .boot {
   min-height: 100vh;
-  background: #070a12;
+  background: #0a0a0a;
 }
 </style>

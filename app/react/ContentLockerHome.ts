@@ -38,12 +38,9 @@ const DEFAULT_BUTTONS: LockerButton[] = [
   { id: uid(), label: 'Follow on X', url: 'https://x.com/' },
 ]
 
-/**
- * Locker site canvas. Also drives the page atmosphere so the inset panel
- * reads as cut out of the same background (reference “flower bit” effect).
- */
-const CANVAS =
-  'radial-gradient(120% 80% at 50% 0%, #3b82f6 0%, #1e3a8a 32%, #0b1224 68%, #070a12 100%)'
+/** Preview panel / published locker canvas only — not the page chrome. */
+const PANEL_CANVAS =
+  'radial-gradient(120% 80% at 50% 0%, #3b82f6 0%, #1e3a8a 34%, #0b1224 70%, #070a12 100%)'
 
 export function ContentLockerHome() {
   const [buttons, setButtons] = useState<LockerButton[]>(DEFAULT_BUTTONS)
@@ -78,36 +75,24 @@ export function ContentLockerHome() {
     },
     el(
       'div',
-      { className: 'gated-page' },
-      // Same canvas as the inset panel — blurred / scaled so the panel feels embedded
-      el('div', {
-        className: 'gated-page__atmosphere',
-        style: { backgroundImage: CANVAS },
-        'aria-hidden': true,
-      }),
-      el('div', { className: 'gated-page__dim', 'aria-hidden': true }),
-
+      { className: 'gated-shell' },
+      // LEFT
       el(
-        'div',
-        { className: 'gated-shell' },
-        // LEFT — clean Whop-like controls (built from scratch)
+        'main',
+        { className: 'gated-form' },
         el(
-          'main',
-          { className: 'gated-form' },
+          'div',
+          { className: 'gated-form__inner' },
+          el(Text, { size: '4', weight: 'bold', className: 'gated-logo' }, 'gated'),
           el(
-            'div',
-            { className: 'gated-form__top' },
-            el(Text, { size: '4', weight: 'bold', className: 'gated-logo' }, 'gated'),
-            el(
-              Heading,
-              { as: 'h1', size: '8', weight: 'bold', className: 'gated-title' },
-              'Welcome',
-            ),
-            el(
-              Text,
-              { size: '2', color: 'gray', className: 'gated-lede' },
-              'Build unlock buttons for your content locker. Preview updates on the right.',
-            ),
+            Heading,
+            { as: 'h1', size: '8', weight: 'bold', className: 'gated-title' },
+            'Welcome',
+          ),
+          el(
+            Text,
+            { size: '2', color: 'gray', className: 'gated-lede' },
+            'Build unlock buttons for your content locker. Preview updates on the right.',
           ),
 
           el(
@@ -177,65 +162,63 @@ export function ContentLockerHome() {
               el('span', null, 'Add button'),
             ),
           ),
-
-          el(Separator, { size: '4', className: 'gated-form__rule' }),
-
-          el(
-            Text,
-            { size: '1', color: 'gray', className: 'gated-form__foot' },
-            'Sign up / auth comes later — design only for now.',
-          ),
         ),
 
-        // RIGHT — inset “flower bit”: padded panel cut from the shared atmosphere
         el(
-          'aside',
-          { className: 'gated-embed', 'aria-label': 'Locker preview' },
+          'div',
+          { className: 'gated-form__footer' },
+          el(Text, { size: '1', color: 'gray' }, 'Design only — auth later'),
+        ),
+      ),
+
+      // RIGHT — inset panel padded inside the full-bleed shell
+      el(
+        'aside',
+        { className: 'gated-embed', 'aria-label': 'Locker preview' },
+        el(
+          'div',
+          {
+            className: 'gated-embed__panel',
+            style: { backgroundImage: PANEL_CANVAS },
+          },
           el(
             'div',
-            {
-              className: 'gated-embed__panel',
-              style: { backgroundImage: CANVAS },
-            },
+            { className: 'gated-embed__content' },
+            el('div', { className: 'gated-embed__icon' }, el(Lock20, null)),
+            el(
+              Heading,
+              {
+                as: 'h2',
+                size: '6',
+                weight: 'bold',
+                align: 'center',
+                highContrast: true,
+              },
+              'Content locked',
+            ),
+            el(
+              Text,
+              { size: '2', align: 'center', className: 'gated-embed__copy' },
+              'Complete a step below to unlock.',
+            ),
             el(
               'div',
-              { className: 'gated-embed__content' },
-              el('div', { className: 'gated-embed__icon' }, el(Lock20, null)),
-              el(
-                Heading,
-                {
-                  as: 'h2',
-                  size: '6',
-                  weight: 'bold',
-                  align: 'center',
-                  highContrast: true,
-                },
-                'Content locked',
-              ),
-              el(
-                Text,
-                { size: '2', align: 'center', className: 'gated-embed__copy' },
-                'Complete a step below to unlock.',
-              ),
-              el(
-                'div',
-                { className: 'gated-embed__actions' },
-                ...buttons.map((button) =>
-                  el(
-                    Button,
-                    {
-                      key: button.id,
-                      size: '3',
-                      variant: 'solid',
-                      color: 'blue',
-                      className: 'gated-embed__cta',
-                      onClick: () => {
-                        if (!button.url) return
-                        window.open(button.url, '_blank', 'noopener,noreferrer')
-                      },
+              { className: 'gated-embed__actions' },
+              ...buttons.map((button) =>
+                el(
+                  Button,
+                  {
+                    key: button.id,
+                    size: '3',
+                    variant: 'solid',
+                    color: 'blue',
+                    className: 'gated-embed__cta',
+                    onClick: () => {
+                      if (!button.url) return
+                      window.open(button.url, '_blank', 'noopener,noreferrer')
                     },
-                    button.label || 'Untitled',
-                  ),
+                  },
+                  button.label || 'Untitled',
                 ),
               ),
             ),
