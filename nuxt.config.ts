@@ -15,6 +15,7 @@ function frostedUiBundlePlugin(): Plugin {
   const virtualId = 'virtual:frosted-ui'
   const resolvedId = '\0' + virtualId
   let cached: string | null = null
+  let cachedAt = 0
 
   return {
     name: 'frosted-ui-bundle',
@@ -24,7 +25,10 @@ function frostedUiBundlePlugin(): Plugin {
     async load(id) {
       if (id !== resolvedId) return
 
-      if (!cached) {
+      // Rebuild when the barrel entry changes (dev HMR / edits).
+      const { statSync } = await import('node:fs')
+      const mtime = statSync(frostedEntry).mtimeMs
+      if (!cached || mtime > cachedAt) {
         const result = await esbuild.build({
           entryPoints: [frostedEntry],
           bundle: true,
@@ -48,6 +52,7 @@ function frostedUiBundlePlugin(): Plugin {
           },
         })
         cached = result.outputFiles[0]?.text ?? ''
+        cachedAt = mtime
       }
 
       return cached

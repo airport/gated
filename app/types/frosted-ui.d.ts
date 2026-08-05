@@ -4,7 +4,6 @@ declare module 'virtual:frosted-ui' {
     ReactElement,
     ReactNode,
     Key,
-    JSXElementConstructor,
   } from 'react'
   import type { Root } from 'react-dom/client'
 
@@ -50,4 +49,17 @@ declare module 'virtual:frosted-ui' {
     Tooltip,
     frostedThemePlugin,
   } from 'frosted-ui'
+
+  export {
+    Plus16,
+    Plus20,
+    Trash16,
+    Trash20,
+    Link16,
+    Link20,
+    Lock20,
+    Lock24,
+    Globe16,
+    Globe20,
+  } from '@frosted-ui/icons'
 }
