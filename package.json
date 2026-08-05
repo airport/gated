@@ -7,7 +7,9 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "generate:pages": "NODE_ENV=production NUXT_APP_BASE_URL=/gated/ nuxt generate",
+    "pages:sync": "rm -rf docs && cp -a .output/public docs"
   },
   "dependencies": {
     "@frosted-ui/icons": "0.0.1-canary.154",

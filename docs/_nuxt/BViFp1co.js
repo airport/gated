@@ -1,0 +1,1 @@
+import{E as e,K as t,N as n,Q as r,t as i}from"./DeyzcuTH.js";import{u as a}from"./CUkrH2HT.js";var o={class:`boot`},s=i(n({__name:`index`,async setup(n){let i,s;return[i,s]=r(()=>a(`/home`)),await i,s(),(n,r)=>(t(),e(`div`,o))}}),[[`__scopeId`,`data-v-6bd601ea`]]);export{s as default};
