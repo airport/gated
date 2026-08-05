@@ -148,10 +148,9 @@ body {
   padding-bottom: 0.25rem;
 }
 
-/* —— Right: no shell scroll; fixed centered preview —— */
+/* —— Right: fills column (inset padded), never grows/scrolls the shell —— */
 .gated-embed {
   display: grid;
-  place-items: center;
   box-sizing: border-box;
   background: #0a0a0a;
   height: 100%;
@@ -167,9 +166,10 @@ body {
   background-position: center;
   position: relative;
   overflow: hidden;
-  width: min(100%, 400px);
-  height: min(100%, 640px);
-  max-height: calc(100vh - 2 * clamp(1rem, 2.5vw, 1.75rem));
+  /* Fill the whole right inset area again — do not shrink to a phone card */
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   display: grid;
 }
@@ -179,12 +179,12 @@ body {
   z-index: 1;
   height: 100%;
   min-height: 0;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  align-content: center;
-  justify-items: center;
-  gap: 1rem;
-  padding: clamp(1.25rem, 3vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  padding: clamp(1.75rem, 4vw, 2.75rem);
   box-sizing: border-box;
   background: linear-gradient(
     180deg,
@@ -213,22 +213,24 @@ body {
 }
 
 .gated-embed__copy {
-  max-width: 16rem;
+  max-width: 18rem;
   color: rgba(255, 255, 255, 0.72) !important;
 }
 
-/* Buttons scroll inside the fixed panel only — right column itself never grows */
+/* Extra actions scroll inside the panel; panel size stays locked to the column */
 .gated-embed__actions {
   display: grid;
-  gap: 0.55rem;
-  width: min(100%, 17.5rem);
+  gap: 0.65rem;
+  width: min(100%, 20rem);
   align-content: start;
+  flex: 0 1 auto;
+  max-height: min(42vh, 280px);
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding-right: 0.15rem;
-  margin-top: 0.25rem;
+  margin-top: 0.35rem;
 }
 
 .gated-brand-btn {
