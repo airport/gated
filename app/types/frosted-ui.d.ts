@@ -48,15 +48,37 @@ declare module 'virtual:frosted-ui' {
     Tabs,
     Tooltip,
     DataList,
+    Table,
     Code,
+    Toaster,
+    toast,
+    DateRangePicker,
     frostedThemePlugin,
   } from 'frosted-ui'
+
+  export {
+    today,
+    getLocalTimeZone,
+    parseDate,
+  } from '@internationalized/date'
+
+  export {
+    ResponsiveContainer,
+    ComposedChart,
+    Area,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip as RechartsTooltip,
+  } from 'recharts'
 
   export {
     Plus16,
     Plus20,
     Trash16,
     Trash20,
+    TrashFilled20,
     Link16,
     Link20,
     LinkFilled20,
@@ -65,8 +87,11 @@ declare module 'virtual:frosted-ui' {
     MoneyReceiptFilled20,
     GearFilled20,
     CopyFilled20,
+    CopyBoldFilled20,
     Pencil20,
+    EditBold20,
     Stats20,
+    DashboardBarGraphBoldFilled20,
     EyeFilled20,
     BarChart20,
     Lock20,
