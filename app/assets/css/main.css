@@ -1,0 +1,19 @@
+@config "../../../tailwind.config.js";
+@layer theme, base, frosted_ui, components, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'frosted-ui/styles.css' layer(frosted_ui);
+
+html,
+body,
+#__nuxt {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--gray-1);
+  color: var(--gray-12);
+}
