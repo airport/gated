@@ -30,7 +30,7 @@ export const SOCIAL_PRESETS: SocialPreset[] = [
     platform: 'YouTube',
     label: 'Subscribe to channel',
     inputKind: 'handle',
-    placeholder: 'channel or handle',
+    placeholder: 'handle',
     prefix: '@',
     brand: '#FF0000',
   },

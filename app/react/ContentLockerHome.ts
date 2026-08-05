@@ -42,7 +42,7 @@ type LockerAction = {
 
 const PLATFORM_ICONS: Record<
   PlatformId,
-  ComponentType<{ className?: string }>
+  ComponentType<{ className?: string; style?: Record<string, string> }>
 > = {
   youtube: YoutubeFilled20,
   instagram: InstagramFilled20,
@@ -88,6 +88,11 @@ function normalizeUrl(input: string): string {
   const v = input.trim()
   if (!v) return ''
   return v.startsWith('http://') || v.startsWith('https://') ? v : `https://${v}`
+}
+
+function platformAccent(preset: SocialPreset) {
+  // Near-black brands need a light glyph on dark UI.
+  return preset.brandText ?? preset.brand
 }
 
 function BrandButton({
@@ -340,7 +345,10 @@ export function ContentLockerHome() {
                   el(
                     'div',
                     { className: 'gated-item__meta' },
-                    el(Icon, { className: 'gated-item__platform-icon' }),
+                    el(Icon, {
+                      className: 'gated-item__platform-icon',
+                      style: { color: platformAccent(preset) },
+                    }),
                     el(
                       'div',
                       { className: 'gated-item__titles' },
@@ -405,19 +413,28 @@ export function ContentLockerHome() {
                 }),
                 el(
                   Select.Content,
-                  { position: 'popper' },
+                  { position: 'popper', className: 'gated-select-content' },
                   ...groups.flatMap(([platform, presets]) => [
                     el(
                       Select.Group,
                       { key: platform },
                       el(Select.GroupLabel, null, platform),
-                      ...presets.map((preset) =>
-                        el(
+                      ...presets.map((preset) => {
+                        const Icon = PLATFORM_ICONS[preset.platformId]
+                        return el(
                           Select.Item,
                           { key: preset.id, value: preset.id },
-                          preset.label,
-                        ),
-                      ),
+                          el(
+                            'span',
+                            { className: 'gated-select-item' },
+                            el(Icon, {
+                              className: 'gated-select-item__icon',
+                              style: { color: platformAccent(preset) },
+                            }),
+                            el('span', null, preset.label),
+                          ),
+                        )
+                      }),
                     ),
                   ]),
                 ),
