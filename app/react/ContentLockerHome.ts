@@ -11,6 +11,9 @@ import {
   TextField,
   TextArea,
   Select,
+  DataList,
+  Code,
+  Separator,
   Trash16,
   Plus20,
   CopyFilled20,
@@ -425,8 +428,9 @@ export function ContentLockerHome() {
     setSlugTouched(true)
     setEditingId(mode === 'edit' ? link.id : null)
     setSelectedVaultId(null)
-    setNav('home')
     setCreateFlash('')
+    // Edit stays in Vault; copy opens a fresh Home draft.
+    setNav(mode === 'edit' ? 'vault' : 'home')
   }
 
   const createOrUpdateLink = () => {
@@ -447,7 +451,9 @@ export function ContentLockerHome() {
         ),
       )
       setSelectedVaultId(editingId)
+      setEditingId(null)
       setCreateFlash('Link updated')
+      setNav('vault')
     } else {
       const series = makeSeries()
       const views = series.reduce((sum, d) => sum + d.views, 0)
@@ -735,6 +741,7 @@ export function ContentLockerHome() {
                 onClick: () => {
                   setEditingId(null)
                   setCreateFlash('')
+                  setNav('home')
                 },
               },
               'Cancel edit',
@@ -759,87 +766,155 @@ export function ContentLockerHome() {
       Text,
       { size: '2', color: 'gray', className: 'gated-lede' },
       vault.length
-        ? 'Your created lockers. Open stats, edit, or delete.'
+        ? 'Your created lockers.'
         : 'No links yet — create one from Home.',
     ),
     vault.length
       ? el(
           'div',
           { className: 'gated-vault__list' },
-          ...vault.map((link) =>
+          ...vault.map((link, index) =>
             el(
               'div',
               {
                 key: link.id,
                 className:
                   selectedVaultId === link.id
-                    ? 'gated-vault-item gated-vault-item--active'
-                    : 'gated-vault-item',
+                    ? 'gated-vault-entry gated-vault-entry--active'
+                    : 'gated-vault-entry',
               },
               el(
-                'div',
-                { className: 'gated-vault-item__main' },
+                DataList.Root,
+                { orientation: 'horizontal', size: '2' },
                 el(
-                  'div',
-                  { className: 'gated-vault-item__copy' },
-                  el(Text, { size: '2', weight: 'medium' }, link.title),
+                  DataList.Item,
+                  { align: 'center' },
+                  el(DataList.Label, { color: 'gray' }, 'Name'),
+                  el(DataList.Value, null, link.title),
+                ),
+                el(
+                  DataList.Item,
+                  { align: 'center' },
+                  el(DataList.Label, { color: 'gray' }, 'URL'),
                   el(
-                    Text,
-                    { size: '1', color: 'gray' },
-                    `gated.to/${link.slug}`,
-                  ),
-                  el(
-                    Text,
-                    { size: '1', color: 'gray', className: 'gated-vault-item__meta' },
-                    `${link.views} views · ${link.clicks} clicks · ${link.actions.length} steps`,
+                    DataList.Value,
+                    null,
+                    el(
+                      'span',
+                      { className: 'gated-vault-url' },
+                      el(Code, { size: '2', color: 'blue' }, `gated.to/${link.slug}`),
+                      el(
+                        IconButton,
+                        {
+                          size: '1',
+                          variant: 'ghost',
+                          color: 'gray',
+                          'aria-label': `Copy gated.to/${link.slug}`,
+                          onClick: () => {
+                            void navigator.clipboard?.writeText(
+                              `https://gated.to/${link.slug}`,
+                            )
+                          },
+                        },
+                        el(CopyFilled20, null),
+                      ),
+                    ),
                   ),
                 ),
                 el(
-                  'div',
-                  { className: 'gated-vault-item__actions' },
+                  DataList.Item,
+                  { align: 'center' },
+                  el(DataList.Label, { color: 'gray' }, 'Status'),
                   el(
-                    IconButton,
-                    {
-                      size: '2',
-                      variant: selectedVaultId === link.id ? 'solid' : 'soft',
-                      color: 'blue',
-                      'aria-label': `View stats for ${link.title}`,
-                      onClick: () => setSelectedVaultId(link.id),
-                    },
-                    el(Stats20, null),
+                    DataList.Value,
+                    null,
+                    el(
+                      Badge,
+                      { size: '1', variant: 'soft', color: 'green' },
+                      'Active',
+                    ),
                   ),
+                ),
+                el(
+                  DataList.Item,
+                  { align: 'center' },
+                  el(DataList.Label, { color: 'gray' }, 'Views'),
+                  el(DataList.Value, null, String(link.views)),
+                ),
+                el(
+                  DataList.Item,
+                  { align: 'center' },
+                  el(DataList.Label, { color: 'gray' }, 'Clicks'),
+                  el(DataList.Value, null, String(link.clicks)),
+                ),
+                el(
+                  DataList.Item,
+                  { align: 'center' },
+                  el(DataList.Label, { color: 'gray' }, 'Steps'),
+                  el(DataList.Value, null, String(link.actions.length)),
+                ),
+                el(
+                  DataList.Item,
+                  { align: 'center' },
+                  el(DataList.Label, { color: 'gray' }, 'Actions'),
                   el(
-                    IconButton,
-                    {
-                      size: '2',
-                      variant: 'soft',
-                      color: 'gray',
-                      'aria-label': `Edit ${link.title}`,
-                      onClick: () => loadIntoEditor(link, 'edit'),
-                    },
-                    el(Pencil20, null),
-                  ),
-                  el(
-                    IconButton,
-                    {
-                      size: '2',
-                      variant: 'soft',
-                      color: 'red',
-                      'aria-label': `Delete ${link.title}`,
-                      onClick: () => deleteVaultLink(link.id),
-                    },
-                    el(Trash16, null),
+                    DataList.Value,
+                    null,
+                    el(
+                      'div',
+                      { className: 'gated-vault-entry__actions' },
+                      el(
+                        IconButton,
+                        {
+                          size: '1',
+                          variant: selectedVaultId === link.id ? 'soft' : 'ghost',
+                          color: 'gray',
+                          'aria-label': `View stats for ${link.title}`,
+                          onClick: () => setSelectedVaultId(link.id),
+                        },
+                        el(Stats20, null),
+                      ),
+                      el(
+                        IconButton,
+                        {
+                          size: '1',
+                          variant: 'ghost',
+                          color: 'gray',
+                          'aria-label': `Edit ${link.title}`,
+                          onClick: () => loadIntoEditor(link, 'edit'),
+                        },
+                        el(Pencil20, null),
+                      ),
+                      el(
+                        IconButton,
+                        {
+                          size: '1',
+                          variant: 'ghost',
+                          color: 'red',
+                          'aria-label': `Delete ${link.title}`,
+                          onClick: () => deleteVaultLink(link.id),
+                        },
+                        el(Trash16, null),
+                      ),
+                    ),
                   ),
                 ),
               ),
+              index < vault.length - 1
+                ? el(Separator, { size: '4', className: 'gated-vault-sep' })
+                : null,
             ),
           ),
         )
       : null,
   )
 
-  const pageContent =
-    nav === 'home'
+  const showEditor = nav === 'home' || Boolean(editingId)
+  const navHighlight: NavId = editingId ? 'vault' : nav
+
+  const pageContent = editingId
+    ? homeContent
+    : nav === 'home'
       ? homeContent
       : nav === 'vault'
         ? vaultContent
@@ -1096,8 +1171,12 @@ export function ContentLockerHome() {
                   key: item.id,
                   label: item.label,
                   Icon: item.Icon,
-                  active: nav === item.id,
+                  active: navHighlight === item.id,
                   onClick: () => {
+                    if (editingId && item.id !== 'vault') {
+                      setEditingId(null)
+                      setCreateFlash('')
+                    }
                     setNav(item.id)
                     if (item.id !== 'vault') setSelectedVaultId(null)
                   },
@@ -1128,9 +1207,11 @@ export function ContentLockerHome() {
         {
           className: 'gated-embed',
           'aria-label':
-            nav === 'vault' ? 'Link insights' : 'Locker preview',
+            !showEditor && nav === 'vault'
+              ? 'Link insights'
+              : 'Locker preview',
         },
-        nav === 'vault' ? vaultDetailPanel : previewPanel,
+        !showEditor && nav === 'vault' ? vaultDetailPanel : previewPanel,
       ),
     ),
   )

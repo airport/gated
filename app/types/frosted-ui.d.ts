@@ -47,6 +47,8 @@ declare module 'virtual:frosted-ui' {
     Select,
     Tabs,
     Tooltip,
+    DataList,
+    Code,
     frostedThemePlugin,
   } from 'frosted-ui'
 

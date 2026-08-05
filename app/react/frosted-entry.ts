@@ -40,6 +40,8 @@ export {
   Select,
   Tabs,
   Tooltip,
+  DataList,
+  Code,
   frostedThemePlugin,
 } from 'frosted-ui'
 
