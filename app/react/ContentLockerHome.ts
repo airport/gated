@@ -421,8 +421,8 @@ function ActionTip({
 }) {
   return el(
     Tooltip,
-    { content: label, side: 'top', delay: 120, closeOnClick: true },
-    children,
+    { content: label, side: 'top', delay: 100, closeDelay: 0 },
+    el('span', { className: 'gated-tip', tabIndex: -1 }, children),
   )
 }
 

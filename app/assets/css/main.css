@@ -468,6 +468,7 @@ body {
 .gated-vault-table {
   width: 100%;
   margin-top: 0.35rem;
+  overflow-x: auto;
 }
 
 .gated-vault-table .fui-TableRootTable {
@@ -545,6 +546,16 @@ body {
   align-items: center;
   justify-content: flex-end;
   gap: 0.1rem;
+}
+
+.gated-tip {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.gated-tip:focus {
+  outline: none;
 }
 
 .gated-status-btn {
