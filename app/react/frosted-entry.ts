@@ -1,5 +1,5 @@
 /**
- * Vendor barrel — Frosted UI + shared React + icons.
+ * Vendor barrel — Frosted UI + shared React + icons + charts.
  * Import from `virtual:frosted-ui` (see nuxt.config.ts esbuild plugin).
  */
 export {
@@ -41,15 +41,37 @@ export {
   Tabs,
   Tooltip,
   DataList,
+  Table,
   Code,
+  Toaster,
+  toast,
+  DateRangePicker,
   frostedThemePlugin,
 } from 'frosted-ui'
+
+export {
+  today,
+  getLocalTimeZone,
+  parseDate,
+} from '@internationalized/date'
+
+export {
+  ResponsiveContainer,
+  ComposedChart,
+  Area,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+} from 'recharts'
 
 export {
   Plus16,
   Plus20,
   Trash16,
   Trash20,
+  TrashFilled20,
   Link16,
   Link20,
   LinkFilled20,
@@ -58,8 +80,11 @@ export {
   MoneyReceiptFilled20,
   GearFilled20,
   CopyFilled20,
+  CopyBoldFilled20,
   Pencil20,
+  EditBold20,
   Stats20,
+  DashboardBarGraphBoldFilled20,
   EyeFilled20,
   BarChart20,
   Lock20,

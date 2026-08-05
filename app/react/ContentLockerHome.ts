@@ -1,6 +1,7 @@
 import {
   createElement,
   useMemo,
+  useRef,
   useState,
   Theme,
   Heading,
@@ -11,14 +12,26 @@ import {
   TextField,
   TextArea,
   Select,
-  DataList,
-  Code,
-  Separator,
-  Trash16,
+  Table,
+  Tooltip,
+  Toaster,
+  toast,
+  DateRangePicker,
+  today,
+  getLocalTimeZone,
+  ResponsiveContainer,
+  ComposedChart,
+  Area,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  RechartsTooltip,
   Plus20,
-  CopyFilled20,
-  Pencil20,
-  Stats20,
+  TrashFilled20,
+  CopyBoldFilled20,
+  EditBold20,
+  DashboardBarGraphBoldFilled20,
   EyeFilled20,
   LockFilled20,
   LinkFilled20,
@@ -36,6 +49,7 @@ import {
   TelegramFilled20,
   Linkedin20,
   type ReactNode,
+  type ReactElement,
   type ComponentType,
 } from 'virtual:frosted-ui'
 import {
@@ -65,6 +79,7 @@ type VaultLink = {
   destinationUrl: string
   actions: LockerAction[]
   createdAt: number
+  active: boolean
   views: number
   clicks: number
   unlocks: number
@@ -129,6 +144,31 @@ function makeSeries(): DayStat[] {
     const clicks = Math.max(4, Math.round(views * (0.18 + (i % 4) * 0.04)))
     return { label, views, clicks }
   })
+}
+
+function seriesForRange(
+  base: DayStat[],
+  range: { start: { add: (v: { days: number }) => any; compare: (other: any) => number }; end: unknown } | null,
+): DayStat[] {
+  if (!range?.start || !range?.end || !base.length) return base
+  const tz = getLocalTimeZone()
+  const out: DayStat[] = []
+  let cursor: any = range.start
+  let i = 0
+  while (cursor.compare(range.end) <= 0 && i < 62) {
+    const src = base[i % base.length]
+    const label = cursor
+      .toDate(tz)
+      .toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    out.push({
+      label,
+      views: src.views,
+      clicks: src.clicks,
+    })
+    cursor = cursor.add({ days: 1 })
+    i += 1
+  }
+  return out.length ? out : base
 }
 
 function freshActions(): LockerAction[] {
@@ -272,97 +312,350 @@ function niceMax(value: number) {
   return nice * exp
 }
 
-function linePath(
-  points: { x: number; y: number }[],
-): string {
-  if (!points.length) return ''
-  return points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
-    .join(' ')
-}
-
-function ViewsClicksChart({ series }: { series: DayStat[] }) {
-  const w = 360
-  const h = 168
-  const left = 8
-  const right = 36
-  const top = 12
-  const bottom = 28
-  const plotW = w - left - right
-  const plotH = h - top - bottom
-  const maxVal = niceMax(Math.max(...series.map((d) => d.views), 1))
-  const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => Math.round(maxVal * t))
-
-  const toPoint = (value: number, index: number) => {
-    const x =
-      left +
-      (series.length === 1 ? plotW / 2 : (index / (series.length - 1)) * plotW)
-    const y = top + plotH - (value / maxVal) * plotH
-    return { x, y }
-  }
-
-  const viewPts = series.map((d, i) => toPoint(d.views, i))
-  const clickPts = series.map((d, i) => toPoint(d.clicks, i))
+function ViewsClicksChart({
+  series,
+  chartKey,
+}: {
+  series: DayStat[]
+  chartKey: string
+}) {
+  const maxVal = niceMax(Math.max(...series.map((d) => Math.max(d.views, d.clicks)), 1))
 
   return el(
-    'svg',
-    {
-      className: 'gated-chart',
-      viewBox: `0 0 ${w} ${h}`,
-      role: 'img',
-      'aria-label': 'Views and clicks over the last 7 days',
-    },
-    ...ticks.map((tick, i) => {
-      const y = top + plotH - (tick / maxVal) * plotH
-      return [
-        el('line', {
-          key: `g-${i}`,
-          x1: left,
-          x2: w - right,
-          y1: y,
-          y2: y,
-          className: 'gated-chart__grid',
-        }),
-        el(
-          'text',
-          {
-            key: `yt-${i}`,
-            x: w - right + 6,
-            y: y + 3,
-            className: 'gated-chart__axis',
-          },
-          String(tick),
-        ),
-      ]
-    }),
-    el('path', {
-      d: linePath(viewPts),
-      className: 'gated-chart__line gated-chart__line--views',
-      fill: 'none',
-    }),
-    el('path', {
-      d: linePath(clickPts),
-      className: 'gated-chart__line gated-chart__line--clicks',
-      fill: 'none',
-    }),
+    'div',
+    { className: 'gated-chart-frame', key: chartKey },
     el(
-      'text',
-      {
-        x: left,
-        y: h - 6,
-        className: 'gated-chart__axis',
+      ResponsiveContainer,
+      { width: '100%', height: 228 },
+      el(
+        ComposedChart,
+        {
+          data: series,
+          margin: { top: 10, right: 8, left: 0, bottom: 4 },
+        },
+        el(
+          'defs',
+          null,
+          el(
+            'linearGradient',
+            { id: `gatedViewsFill-${chartKey}`, x1: '0', y1: '0', x2: '0', y2: '1' },
+            el('stop', {
+              offset: '0%',
+              stopColor: '#3b82f6',
+              stopOpacity: 0.38,
+            }),
+            el('stop', {
+              offset: '100%',
+              stopColor: '#3b82f6',
+              stopOpacity: 0,
+            }),
+          ),
+        ),
+        el(CartesianGrid, {
+          stroke: 'rgba(255,255,255,0.07)',
+          vertical: false,
+          strokeDasharray: '0',
+        }),
+        el(XAxis, {
+          dataKey: 'label',
+          axisLine: false,
+          tickLine: false,
+          tick: { fill: 'rgba(255,255,255,0.42)', fontSize: 11 },
+          dy: 8,
+          minTickGap: 18,
+        }),
+        el(YAxis, {
+          orientation: 'right',
+          axisLine: false,
+          tickLine: false,
+          domain: [0, maxVal],
+          width: 36,
+          tick: { fill: 'rgba(255,255,255,0.42)', fontSize: 11 },
+        }),
+        el(RechartsTooltip, {
+          cursor: { stroke: 'rgba(255,255,255,0.12)' },
+          contentStyle: {
+            background: '#111318',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 10,
+            boxShadow: '0 12px 32px rgba(0,0,0,0.35)',
+            color: '#fff',
+            fontSize: 12,
+          },
+          labelStyle: { color: 'rgba(255,255,255,0.55)' },
+        }),
+        el(Area, {
+          type: 'monotone',
+          dataKey: 'views',
+          name: 'Views',
+          stroke: '#3b82f6',
+          fill: `url(#gatedViewsFill-${chartKey})`,
+          strokeWidth: 2.25,
+          animationDuration: 850,
+          animationEasing: 'ease-out',
+          isAnimationActive: true,
+        }),
+        el(Line, {
+          type: 'monotone',
+          dataKey: 'clicks',
+          name: 'Clicks',
+          stroke: '#34d399',
+          strokeWidth: 2.25,
+          dot: false,
+          activeDot: { r: 4, strokeWidth: 0 },
+          animationDuration: 850,
+          animationEasing: 'ease-out',
+          isAnimationActive: true,
+        }),
+      ),
+    ),
+  )
+}
+
+function ActionTip({
+  label,
+  children,
+}: {
+  label: string
+  children: ReactElement
+}) {
+  return el(Tooltip, { content: label, side: 'top', delay: 180 }, children)
+}
+
+function StatusBadge({
+  active,
+  onToggle,
+}: {
+  active: boolean
+  onToggle: () => void
+}) {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  return el(
+    'button',
+    {
+      type: 'button',
+      className: active
+        ? 'gated-status-btn gated-status-btn--active'
+        : 'gated-status-btn gated-status-btn--inactive',
+      'aria-label': active ? 'Active status' : 'Inactive status',
+      onClick: (e: { preventDefault: () => void; stopPropagation: () => void }) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (timerRef.current) return
+        timerRef.current = setTimeout(() => {
+          timerRef.current = null
+          toast.warning(
+            active
+              ? 'Double-click to set this locker Inactive'
+              : 'Double-click to set this locker Active',
+          )
+        }, 260)
       },
-      series[0]?.label ?? '',
+      onDoubleClick: (e: { preventDefault: () => void; stopPropagation: () => void }) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (timerRef.current) {
+          clearTimeout(timerRef.current)
+          timerRef.current = null
+        }
+        onToggle()
+        toast.success(
+          active ? 'Locker set to Inactive' : 'Locker set to Active',
+        )
+      },
+    },
+    el(
+      Badge,
+      {
+        size: '1',
+        variant: 'soft',
+        color: active ? 'green' : 'gray',
+      },
+      active ? 'Active' : 'Inactive',
+    ),
+  )
+}
+
+function InsightsPanel({
+  link,
+  onCopy,
+  onEdit,
+  onDelete,
+}: {
+  link: VaultLink
+  onCopy: () => void
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  const tz = getLocalTimeZone()
+  const [range, setRange] = useState(() => {
+    const end = today(tz)
+    return { start: end.subtract({ days: 6 }), end }
+  })
+
+  const chartSeries = useMemo(
+    () => seriesForRange(link.series, range),
+    [link.series, range],
+  )
+  const chartKey = range
+    ? `${range.start.toString()}_${range.end.toString()}`
+    : 'default'
+
+  return el(
+    'div',
+    { className: 'gated-detail' },
+    el(
+      'div',
+      { className: 'gated-detail__head' },
+      el(
+        'a',
+        {
+          className: 'gated-detail__url',
+          href: `https://gated.to/${link.slug}`,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+        },
+        `gated.to/${link.slug}`,
+      ),
+      el(
+        Heading,
+        { as: 'h2', size: '6', weight: 'bold', highContrast: true },
+        link.title,
+      ),
+      el(
+        Text,
+        { size: '2', color: 'gray', className: 'gated-detail__desc' },
+        link.description,
+      ),
     ),
     el(
-      'text',
-      {
-        x: w - right,
-        y: h - 6,
-        textAnchor: 'end',
-        className: 'gated-chart__axis',
-      },
-      series[series.length - 1]?.label ?? '',
+      'div',
+      { className: 'gated-detail__stats' },
+      el(
+        'div',
+        { className: 'gated-stat' },
+        el(
+          'div',
+          { className: 'gated-stat__top' },
+          el(Text, { size: '1', color: 'gray' }, 'Views'),
+          el(EyeFilled20, { className: 'gated-stat__icon' }),
+        ),
+        el(Text, { size: '5', weight: 'bold' }, String(link.views)),
+      ),
+      el(
+        'div',
+        { className: 'gated-stat' },
+        el(
+          'div',
+          { className: 'gated-stat__top' },
+          el(Text, { size: '1', color: 'gray' }, 'Clicks'),
+          el(DashboardBarGraphBoldFilled20, { className: 'gated-stat__icon' }),
+        ),
+        el(Text, { size: '5', weight: 'bold' }, String(link.clicks)),
+      ),
+      el(
+        'div',
+        { className: 'gated-stat' },
+        el(
+          'div',
+          { className: 'gated-stat__top' },
+          el(Text, { size: '1', color: 'gray' }, 'Unlocks'),
+          el(LockFilled20, { className: 'gated-stat__icon' }),
+        ),
+        el(Text, { size: '5', weight: 'bold' }, String(link.unlocks)),
+      ),
+    ),
+    el(
+      'div',
+      { className: 'gated-detail__chart-wrap' },
+      el(
+        'div',
+        { className: 'gated-detail__chart-head' },
+        el(
+          'div',
+          { className: 'gated-detail__chart-titles' },
+          el(Text, { size: '2', weight: 'medium' }, 'Views & clicks'),
+          el(
+            'div',
+            { className: 'gated-chart-legend' },
+            el(
+              'span',
+              {
+                className:
+                  'gated-chart-legend__item gated-chart-legend__item--views',
+              },
+              'Views',
+            ),
+            el(
+              'span',
+              {
+                className:
+                  'gated-chart-legend__item gated-chart-legend__item--clicks',
+              },
+              'Clicks',
+            ),
+          ),
+        ),
+        el(DateRangePicker, {
+          size: '1',
+          value: range,
+          onChange: (next: typeof range | null) => {
+            if (next?.start && next?.end) setRange(next)
+          },
+        }),
+      ),
+      el(ViewsClicksChart, { series: chartSeries, chartKey }),
+    ),
+    el(
+      'div',
+      { className: 'gated-detail__actions' },
+      el(
+        ActionTip,
+        { label: 'Copy config' },
+        el(
+          IconButton,
+          {
+            size: '3',
+            variant: 'soft',
+            color: 'gray',
+            highContrast: true,
+            'aria-label': 'Copy config',
+            onClick: onCopy,
+          },
+          el(CopyBoldFilled20, null),
+        ),
+      ),
+      el(
+        ActionTip,
+        { label: 'Edit' },
+        el(
+          IconButton,
+          {
+            size: '3',
+            variant: 'soft',
+            color: 'gray',
+            'aria-label': 'Edit',
+            onClick: onEdit,
+          },
+          el(EditBold20, null),
+        ),
+      ),
+      el(
+        ActionTip,
+        { label: 'Delete' },
+        el(
+          IconButton,
+          {
+            size: '3',
+            variant: 'soft',
+            color: 'red',
+            'aria-label': 'Delete',
+            onClick: onDelete,
+          },
+          el(TrashFilled20, null),
+        ),
+      ),
     ),
   )
 }
@@ -462,6 +755,7 @@ export function ContentLockerHome() {
         id: uid('lnk'),
         ...payload,
         createdAt: Date.now(),
+        active: true,
         views,
         clicks,
         unlocks: Math.max(1, Math.round(clicks * 0.62)),
@@ -479,6 +773,14 @@ export function ContentLockerHome() {
     setVault((prev) => prev.filter((item) => item.id !== id))
     if (selectedVaultId === id) setSelectedVaultId(null)
     if (editingId === id) setEditingId(null)
+  }
+
+  const toggleVaultActive = (id: string) => {
+    setVault((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, active: !item.active } : item,
+      ),
+    )
   }
 
   const homeContent = el(
@@ -648,7 +950,7 @@ export function ContentLockerHome() {
                 'aria-label': `Remove ${preset.label}`,
                 onClick: () => removeAction(action.id),
               },
-              el(Trash16, null),
+              el(TrashFilled20, null),
             ),
           ),
           el(
@@ -771,138 +1073,163 @@ export function ContentLockerHome() {
     ),
     vault.length
       ? el(
-          'div',
-          { className: 'gated-vault__list' },
-          ...vault.map((link, index) =>
+          Table.Root,
+          { size: '2', variant: 'ghost', className: 'gated-vault-table' },
+          el(
+            Table.Table,
+            null,
             el(
-              'div',
-              {
-                key: link.id,
-                className:
-                  selectedVaultId === link.id
-                    ? 'gated-vault-entry gated-vault-entry--active'
-                    : 'gated-vault-entry',
-              },
+              Table.Header,
+              null,
               el(
-                DataList.Root,
-                { orientation: 'horizontal', size: '2' },
+                Table.Row,
+                null,
+                el(Table.ColumnHeaderCell, null, 'Name'),
+                el(Table.ColumnHeaderCell, null, 'URL'),
+                el(Table.ColumnHeaderCell, null, 'Status'),
+                el(Table.ColumnHeaderCell, { justify: 'end' }, 'Views'),
+                el(Table.ColumnHeaderCell, { justify: 'end' }, 'Clicks'),
+                el(Table.ColumnHeaderCell, { justify: 'end' }, 'Steps'),
+                el(Table.ColumnHeaderCell, { justify: 'end' }, 'Actions'),
+              ),
+            ),
+            el(
+              Table.Body,
+              null,
+              ...vault.map((link) =>
                 el(
-                  DataList.Item,
-                  { align: 'center' },
-                  el(DataList.Label, { color: 'gray' }, 'Name'),
-                  el(DataList.Value, null, link.title),
-                ),
-                el(
-                  DataList.Item,
-                  { align: 'center' },
-                  el(DataList.Label, { color: 'gray' }, 'URL'),
+                  Table.Row,
+                  {
+                    key: link.id,
+                    align: 'center',
+                    className:
+                      selectedVaultId === link.id
+                        ? 'gated-vault-row gated-vault-row--active'
+                        : 'gated-vault-row',
+                  },
                   el(
-                    DataList.Value,
+                    Table.RowHeaderCell,
+                    null,
+                    el(
+                      'button',
+                      {
+                        type: 'button',
+                        className: 'gated-vault-name',
+                        onClick: () => setSelectedVaultId(link.id),
+                      },
+                      link.title,
+                    ),
+                  ),
+                  el(
+                    Table.Cell,
                     null,
                     el(
                       'span',
                       { className: 'gated-vault-url' },
-                      el(Code, { size: '2', color: 'blue' }, `gated.to/${link.slug}`),
                       el(
-                        IconButton,
+                        'a',
                         {
-                          size: '1',
-                          variant: 'ghost',
-                          color: 'gray',
-                          'aria-label': `Copy gated.to/${link.slug}`,
-                          onClick: () => {
-                            void navigator.clipboard?.writeText(
-                              `https://gated.to/${link.slug}`,
-                            )
-                          },
+                          className: 'gated-vault-url-link',
+                          href: `https://gated.to/${link.slug}`,
+                          target: '_blank',
+                          rel: 'noopener noreferrer',
                         },
-                        el(CopyFilled20, null),
+                        `gated.to/${link.slug}`,
+                      ),
+                      el(
+                        ActionTip,
+                        { label: 'Copy link' },
+                        el(
+                          IconButton,
+                          {
+                            size: '1',
+                            variant: 'ghost',
+                            color: 'gray',
+                            'aria-label': `Copy gated.to/${link.slug}`,
+                            onClick: (e: { stopPropagation: () => void }) => {
+                              e.stopPropagation()
+                              void navigator.clipboard?.writeText(
+                                `https://gated.to/${link.slug}`,
+                              )
+                              toast.success('Link copied')
+                            },
+                          },
+                          el(CopyBoldFilled20, null),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                el(
-                  DataList.Item,
-                  { align: 'center' },
-                  el(DataList.Label, { color: 'gray' }, 'Status'),
                   el(
-                    DataList.Value,
+                    Table.Cell,
                     null,
-                    el(
-                      Badge,
-                      { size: '1', variant: 'soft', color: 'green' },
-                      'Active',
-                    ),
+                    el(StatusBadge, {
+                      active: link.active,
+                      onToggle: () => toggleVaultActive(link.id),
+                    }),
                   ),
-                ),
-                el(
-                  DataList.Item,
-                  { align: 'center' },
-                  el(DataList.Label, { color: 'gray' }, 'Views'),
-                  el(DataList.Value, null, String(link.views)),
-                ),
-                el(
-                  DataList.Item,
-                  { align: 'center' },
-                  el(DataList.Label, { color: 'gray' }, 'Clicks'),
-                  el(DataList.Value, null, String(link.clicks)),
-                ),
-                el(
-                  DataList.Item,
-                  { align: 'center' },
-                  el(DataList.Label, { color: 'gray' }, 'Steps'),
-                  el(DataList.Value, null, String(link.actions.length)),
-                ),
-                el(
-                  DataList.Item,
-                  { align: 'center' },
-                  el(DataList.Label, { color: 'gray' }, 'Actions'),
+                  el(Table.Cell, { justify: 'end' }, String(link.views)),
+                  el(Table.Cell, { justify: 'end' }, String(link.clicks)),
                   el(
-                    DataList.Value,
-                    null,
+                    Table.Cell,
+                    { justify: 'end' },
+                    String(link.actions.length),
+                  ),
+                  el(
+                    Table.Cell,
+                    { justify: 'end' },
                     el(
                       'div',
                       { className: 'gated-vault-entry__actions' },
                       el(
-                        IconButton,
-                        {
-                          size: '1',
-                          variant: selectedVaultId === link.id ? 'soft' : 'ghost',
-                          color: 'gray',
-                          'aria-label': `View stats for ${link.title}`,
-                          onClick: () => setSelectedVaultId(link.id),
-                        },
-                        el(Stats20, null),
+                        ActionTip,
+                        { label: 'Stats' },
+                        el(
+                          IconButton,
+                          {
+                            size: '2',
+                            variant:
+                              selectedVaultId === link.id ? 'soft' : 'ghost',
+                            color: 'gray',
+                            'aria-label': `View stats for ${link.title}`,
+                            onClick: () => setSelectedVaultId(link.id),
+                          },
+                          el(DashboardBarGraphBoldFilled20, null),
+                        ),
                       ),
                       el(
-                        IconButton,
-                        {
-                          size: '1',
-                          variant: 'ghost',
-                          color: 'gray',
-                          'aria-label': `Edit ${link.title}`,
-                          onClick: () => loadIntoEditor(link, 'edit'),
-                        },
-                        el(Pencil20, null),
+                        ActionTip,
+                        { label: 'Edit' },
+                        el(
+                          IconButton,
+                          {
+                            size: '2',
+                            variant: 'ghost',
+                            color: 'gray',
+                            'aria-label': `Edit ${link.title}`,
+                            onClick: () => loadIntoEditor(link, 'edit'),
+                          },
+                          el(EditBold20, null),
+                        ),
                       ),
                       el(
-                        IconButton,
-                        {
-                          size: '1',
-                          variant: 'ghost',
-                          color: 'red',
-                          'aria-label': `Delete ${link.title}`,
-                          onClick: () => deleteVaultLink(link.id),
-                        },
-                        el(Trash16, null),
+                        ActionTip,
+                        { label: 'Delete' },
+                        el(
+                          IconButton,
+                          {
+                            size: '2',
+                            variant: 'ghost',
+                            color: 'red',
+                            'aria-label': `Delete ${link.title}`,
+                            onClick: () => deleteVaultLink(link.id),
+                          },
+                          el(TrashFilled20, null),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-              index < vault.length - 1
-                ? el(Separator, { size: '4', className: 'gated-vault-sep' })
-                : null,
             ),
           ),
         )
@@ -996,141 +1323,19 @@ export function ContentLockerHome() {
   )
 
   const vaultDetailPanel = selectedVault
-    ? el(
-        'div',
-        { className: 'gated-detail' },
-        el(
-          'div',
-          { className: 'gated-detail__head' },
-          el(
-            Text,
-            { size: '1', color: 'gray' },
-            `gated.to/${selectedVault.slug}`,
-          ),
-          el(
-            Heading,
-            { as: 'h2', size: '6', weight: 'bold', highContrast: true },
-            selectedVault.title,
-          ),
-          el(
-            Text,
-            { size: '2', color: 'gray', className: 'gated-detail__desc' },
-            selectedVault.description,
-          ),
-        ),
-        el(
-          'div',
-          { className: 'gated-detail__stats' },
-          el(
-            'div',
-            { className: 'gated-stat' },
-            el(
-              'div',
-              { className: 'gated-stat__top' },
-              el(Text, { size: '1', color: 'gray' }, 'Views'),
-              el(EyeFilled20, { className: 'gated-stat__icon' }),
-            ),
-            el(Text, { size: '5', weight: 'bold' }, String(selectedVault.views)),
-          ),
-          el(
-            'div',
-            { className: 'gated-stat' },
-            el(
-              'div',
-              { className: 'gated-stat__top' },
-              el(Text, { size: '1', color: 'gray' }, 'Clicks'),
-              el(Stats20, { className: 'gated-stat__icon' }),
-            ),
-            el(Text, { size: '5', weight: 'bold' }, String(selectedVault.clicks)),
-          ),
-          el(
-            'div',
-            { className: 'gated-stat' },
-            el(
-              'div',
-              { className: 'gated-stat__top' },
-              el(Text, { size: '1', color: 'gray' }, 'Unlocks'),
-              el(LockFilled20, { className: 'gated-stat__icon' }),
-            ),
-            el(Text, { size: '5', weight: 'bold' }, String(selectedVault.unlocks)),
-          ),
-        ),
-        el(
-          'div',
-          { className: 'gated-detail__chart-wrap' },
-          el(
-            'div',
-            { className: 'gated-detail__chart-head' },
-            el(
-              Text,
-              { size: '2', weight: 'medium' },
-              'Views & clicks',
-            ),
-            el(
-              'div',
-              { className: 'gated-chart-legend' },
-              el(
-                'span',
-                {
-                  className:
-                    'gated-chart-legend__item gated-chart-legend__item--views',
-                },
-                'Views',
-              ),
-              el(
-                'span',
-                {
-                  className:
-                    'gated-chart-legend__item gated-chart-legend__item--clicks',
-                },
-                'Clicks',
-              ),
-            ),
-          ),
-          el(Text, { size: '1', color: 'gray' }, 'Last 7 days'),
-          el(ViewsClicksChart, { series: selectedVault.series }),
-        ),
-        el(
-          'div',
-          { className: 'gated-detail__actions' },
-          el(
-            Button,
-            {
-              size: '3',
-              highContrast: true,
-              onClick: () => loadIntoEditor(selectedVault, 'copy'),
-            },
-            el(CopyFilled20, null),
-            'Copy config',
-          ),
-          el(
-            Button,
-            {
-              size: '3',
-              variant: 'soft',
-              color: 'gray',
-              onClick: () => loadIntoEditor(selectedVault, 'edit'),
-            },
-            el(Pencil20, null),
-            'Edit',
-          ),
-          el(
-            Button,
-            {
-              size: '3',
-              variant: 'soft',
-              color: 'red',
-              onClick: () => deleteVaultLink(selectedVault.id),
-            },
-            el(Trash16, null),
-            'Delete',
-          ),
-        ),
-      )
+    ? el(InsightsPanel, {
+        key: selectedVault.id,
+        link: selectedVault,
+        onCopy: () => loadIntoEditor(selectedVault, 'copy'),
+        onEdit: () => loadIntoEditor(selectedVault, 'edit'),
+        onDelete: () => deleteVaultLink(selectedVault.id),
+      })
     : el(
         'div',
         { className: 'gated-detail gated-detail--empty' },
-        el(Stats20, { className: 'gated-detail__empty-icon' }),
+        el(DashboardBarGraphBoldFilled20, {
+          className: 'gated-detail__empty-icon',
+        }),
         el(
           Heading,
           { as: 'h2', size: '5', weight: 'bold', highContrast: true },
@@ -1151,6 +1356,7 @@ export function ContentLockerHome() {
       accentColor: 'blue',
       className: 'gated-theme',
     },
+    el(Toaster, { position: 'bottom-right', timeout: 4200 }),
     el(
       'div',
       { className: 'gated-shell' },
