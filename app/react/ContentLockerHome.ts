@@ -1168,9 +1168,11 @@ export function ContentLockerHome() {
                         el(
                           IconButton,
                           {
-                            size: '1',
+                            size: '2',
                             variant: 'ghost',
                             color: 'gray',
+                            highContrast: true,
+                            className: 'gated-vault-copy',
                             'aria-label': `Copy gated.to/${link.slug}`,
                             onClick: (e: { stopPropagation: () => void }) => {
                               e.stopPropagation()

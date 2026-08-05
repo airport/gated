@@ -517,14 +517,14 @@ body {
 .gated-vault-url {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.25rem;
   min-width: 0;
 }
 
 .gated-vault-url-link {
   display: inline-flex;
   align-items: center;
-  max-width: 12rem;
+  max-width: 11rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -539,6 +539,10 @@ body {
 .gated-vault-url-link:hover {
   background: rgba(59, 130, 246, 0.24);
   color: #bfdbfe;
+}
+
+.gated-vault-copy {
+  flex-shrink: 0;
 }
 
 .gated-vault-entry__actions {
