@@ -8,13 +8,10 @@ import {
   IconButton,
   TextField,
   Separator,
-  Badge,
-  Card,
   Plus16,
   Trash16,
   Link16,
   Lock20,
-  Pencil16,
   type ReactNode,
 } from 'virtual:frosted-ui'
 
@@ -41,12 +38,15 @@ const DEFAULT_BUTTONS: LockerButton[] = [
   { id: uid(), label: 'Follow on X', url: 'https://x.com/' },
 ]
 
-/** Published locker site canvas — fills the inset preview panel. */
-const LOCKER_BG = '#11131a'
+/**
+ * Locker site canvas. Also drives the page atmosphere so the inset panel
+ * reads as cut out of the same background (reference “flower bit” effect).
+ */
+const CANVAS =
+  'radial-gradient(120% 80% at 50% 0%, #3b82f6 0%, #1e3a8a 32%, #0b1224 68%, #070a12 100%)'
 
 export function ContentLockerHome() {
   const [buttons, setButtons] = useState<LockerButton[]>(DEFAULT_BUTTONS)
-
   const canRemove = buttons.length > 1
 
   const addButton = () => {
@@ -74,87 +74,63 @@ export function ContentLockerHome() {
       appearance: 'dark',
       grayColor: 'slate',
       accentColor: 'blue',
-      infoColor: 'sky',
-      successColor: 'green',
-      warningColor: 'amber',
-      dangerColor: 'red',
-      className: 'locker-theme',
+      className: 'gated-theme',
     },
     el(
       'div',
-      { className: 'locker-page' },
+      { className: 'gated-page' },
+      // Same canvas as the inset panel — blurred / scaled so the panel feels embedded
+      el('div', {
+        className: 'gated-page__atmosphere',
+        style: { backgroundImage: CANVAS },
+        'aria-hidden': true,
+      }),
+      el('div', { className: 'gated-page__dim', 'aria-hidden': true }),
+
       el(
         'div',
-        { className: 'locker-frame' },
-        // —— Left: Whop-style controls ——
+        { className: 'gated-shell' },
+        // LEFT — clean Whop-like controls (built from scratch)
         el(
-          'aside',
-          { className: 'locker-side' },
+          'main',
+          { className: 'gated-form' },
           el(
             'div',
-            { className: 'locker-brand' },
-            el('span', { className: 'locker-brand__mark', 'aria-hidden': true }),
-            el(Text, { size: '3', weight: 'bold' }, 'Gated'),
-          ),
-
-          el(
-            'div',
-            { className: 'locker-side__intro' },
+            { className: 'gated-form__top' },
+            el(Text, { size: '4', weight: 'bold', className: 'gated-logo' }, 'gated'),
             el(
               Heading,
-              { as: 'h1', size: '7', weight: 'bold' },
-              'Design your locker',
+              { as: 'h1', size: '8', weight: 'bold', className: 'gated-title' },
+              'Welcome',
             ),
             el(
               Text,
-              { size: '2', color: 'gray', className: 'locker-side__sub' },
-              'Configure unlock buttons and destinations. The panel on the right is your live site preview.',
+              { size: '2', color: 'gray', className: 'gated-lede' },
+              'Build unlock buttons for your content locker. Preview updates on the right.',
             ),
           ),
 
           el(
             'div',
-            { className: 'locker-side__meta' },
-            el(Badge, { size: '1', variant: 'soft', color: 'blue' }, 'Buttons'),
-            el(Text, { size: '1', color: 'gray' }, `${buttons.length} configured`),
-          ),
-
-          el(
-            'div',
-            { className: 'locker-form' },
+            { className: 'gated-form__body' },
             ...buttons.map((button, index) =>
               el(
-                Card,
-                {
-                  key: button.id,
-                  size: '2',
-                  variant: 'surface',
-                  className: 'locker-row',
-                },
+                'div',
+                { key: button.id, className: 'gated-item' },
                 el(
                   'div',
-                  { className: 'locker-row__head' },
+                  { className: 'gated-item__bar' },
                   el(
-                    'div',
-                    { className: 'locker-row__title' },
-                    el(
-                      Text,
-                      { size: '2', weight: 'medium' },
-                      `Button ${index + 1}`,
-                    ),
-                    el(
-                      Text,
-                      { size: '1', color: 'gray' },
-                      button.label || 'Untitled',
-                    ),
+                    Text,
+                    { size: '1', weight: 'medium', color: 'gray' },
+                    `Button ${index + 1}`,
                   ),
                   el(
                     IconButton,
                     {
-                      size: '2',
+                      size: '1',
                       variant: 'ghost',
                       color: 'gray',
-                      highContrast: true,
                       disabled: !canRemove,
                       'aria-label': `Remove button ${index + 1}`,
                       onClick: () => removeButton(button.id),
@@ -162,96 +138,69 @@ export function ContentLockerHome() {
                     el(Trash16, null),
                   ),
                 ),
-
                 el(
-                  'div',
-                  { className: 'locker-row__fields' },
-                  el(
-                    'div',
-                    { className: 'locker-field' },
-                    el(
-                      Text,
-                      { size: '1', weight: 'medium', color: 'gray', as: 'label' },
-                      'Label',
-                    ),
-                    el(
-                      TextField.Root,
-                      { size: '3', variant: 'surface' },
-                      el(TextField.Slot, null, el(Pencil16, null)),
-                      el(TextField.Input, {
-                        value: button.label,
-                        placeholder: 'e.g. Join Discord',
-                        onChange: (event: { target: { value: string } }) =>
-                          updateButton(button.id, {
-                            label: event.target.value,
-                          }),
-                      }),
-                    ),
-                  ),
-                  el(
-                    'div',
-                    { className: 'locker-field' },
-                    el(
-                      Text,
-                      { size: '1', weight: 'medium', color: 'gray', as: 'label' },
-                      'Destination URL',
-                    ),
-                    el(
-                      TextField.Root,
-                      { size: '3', variant: 'surface' },
-                      el(TextField.Slot, null, el(Link16, null)),
-                      el(TextField.Input, {
-                        value: button.url,
-                        placeholder: 'https://…',
-                        inputMode: 'url',
-                        onChange: (event: { target: { value: string } }) =>
-                          updateButton(button.id, { url: event.target.value }),
-                      }),
-                    ),
-                  ),
+                  TextField.Root,
+                  { size: '3', variant: 'surface', className: 'gated-input' },
+                  el(TextField.Input, {
+                    value: button.label,
+                    placeholder: 'Button label',
+                    onChange: (e: { target: { value: string } }) =>
+                      updateButton(button.id, { label: e.target.value }),
+                  }),
+                ),
+                el(
+                  TextField.Root,
+                  { size: '3', variant: 'surface', className: 'gated-input' },
+                  el(TextField.Slot, null, el(Link16, null)),
+                  el(TextField.Input, {
+                    value: button.url,
+                    placeholder: 'https://destination.url',
+                    inputMode: 'url',
+                    onChange: (e: { target: { value: string } }) =>
+                      updateButton(button.id, { url: e.target.value }),
+                  }),
                 ),
               ),
             ),
+
+            el(
+              Button,
+              {
+                size: '3',
+                variant: 'soft',
+                color: 'gray',
+                highContrast: true,
+                className: 'gated-add',
+                onClick: addButton,
+              },
+              el(Plus16, null),
+              el('span', null, 'Add button'),
+            ),
           ),
 
-          el(Separator, { size: '4', className: 'locker-sep' }),
+          el(Separator, { size: '4', className: 'gated-form__rule' }),
 
           el(
-            Button,
-            {
-              size: '3',
-              variant: 'solid',
-              color: 'blue',
-              onClick: addButton,
-              className: 'locker-add',
-            },
-            el(Plus16, null),
-            el('span', null, 'Add button'),
+            Text,
+            { size: '1', color: 'gray', className: 'gated-form__foot' },
+            'Sign up / auth comes later — design only for now.',
           ),
         ),
 
-        // —— Right: inset rounded panel (reference-style) ——
+        // RIGHT — inset “flower bit”: padded panel cut from the shared atmosphere
         el(
-          'section',
-          { className: 'locker-panel-wrap', 'aria-label': 'Locker preview' },
+          'aside',
+          { className: 'gated-embed', 'aria-label': 'Locker preview' },
           el(
             'div',
             {
-              className: 'locker-panel',
-              style: { background: LOCKER_BG },
+              className: 'gated-embed__panel',
+              style: { backgroundImage: CANVAS },
             },
-            el('div', {
-              className: 'locker-panel__wash',
-              'aria-hidden': true,
-            }),
             el(
               'div',
-              { className: 'locker-panel__inner' },
-              el(
-                'div',
-                { className: 'locker-panel__badge' },
-                el(Lock20, null),
-              ),
+              { className: 'gated-embed__content' },
+              el('div', { className: 'gated-embed__icon' }, el(Lock20, null)),
               el(
                 Heading,
                 {
@@ -265,16 +214,12 @@ export function ContentLockerHome() {
               ),
               el(
                 Text,
-                {
-                  size: '2',
-                  align: 'center',
-                  className: 'locker-panel__copy',
-                },
-                'Complete a step below to unlock access.',
+                { size: '2', align: 'center', className: 'gated-embed__copy' },
+                'Complete a step below to unlock.',
               ),
               el(
                 'div',
-                { className: 'locker-panel__actions' },
+                { className: 'gated-embed__actions' },
                 ...buttons.map((button) =>
                   el(
                     Button,
@@ -283,8 +228,7 @@ export function ContentLockerHome() {
                       size: '3',
                       variant: 'solid',
                       color: 'blue',
-                      highContrast: true,
-                      className: 'locker-panel__cta',
+                      className: 'gated-embed__cta',
                       onClick: () => {
                         if (!button.url) return
                         window.open(button.url, '_blank', 'noopener,noreferrer')

@@ -14,236 +14,221 @@ body,
 
 body {
   margin: 0;
-  background: var(--gray-2, #12141a);
+  background: #070a12;
   color: var(--gray-12, #eee);
 }
 
-.locker-theme {
+.gated-theme {
   display: block;
   min-height: 100vh;
 }
 
-/* Page canvas — soft Whop-like stage behind the main frame */
-.locker-page {
+/* Shared canvas blown up behind the shell — panel looks cut from this */
+.gated-page {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 1.25rem;
+  padding: 1.5rem;
   box-sizing: border-box;
-  background:
-    radial-gradient(900px 420px at 15% 0%, var(--accent-a3), transparent 55%),
-    radial-gradient(700px 380px at 90% 100%, var(--gray-a3), transparent 50%),
-    var(--gray-2);
+  overflow: hidden;
 }
 
-/* Main split frame — mirrors the reference “card with inset panel” */
-.locker-frame {
-  width: min(1100px, 100%);
-  min-height: min(720px, calc(100vh - 2.5rem));
+.gated-page__atmosphere {
+  position: absolute;
+  inset: -12%;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(42px) saturate(1.15);
+  transform: scale(1.08);
+}
+
+.gated-page__dim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(6, 8, 14, 0.42);
+}
+
+.gated-shell {
+  position: relative;
+  z-index: 2;
+  width: min(1040px, 100%);
+  min-height: min(640px, calc(100vh - 3rem));
   display: grid;
   grid-template-columns: 1fr;
-  background: var(--gray-1);
-  border: 1px solid var(--gray-a5);
-  border-radius: 1.5rem;
+  background: #0c0e14;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.35rem;
   overflow: hidden;
-  box-shadow:
-    0 1px 0 var(--gray-a3),
-    0 32px 80px -36px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 40px 100px -40px rgba(0, 0, 0, 0.75);
 }
 
 @media (min-width: 900px) {
-  .locker-frame {
-    grid-template-columns: minmax(320px, 1.05fr) minmax(280px, 0.95fr);
+  .gated-shell {
+    grid-template-columns: 1.05fr 0.95fr;
   }
 }
 
-/* —— Left controls (Whop form column) —— */
-.locker-side {
+/* —— Left form (from scratch, reference-style whitespace) —— */
+.gated-form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  padding: 2rem 1.75rem 1.75rem;
+  padding: 2.5rem 2rem 1.75rem;
   box-sizing: border-box;
-  background: var(--gray-1);
+  background: #0c0e14;
 }
 
 @media (min-width: 900px) {
-  .locker-side {
-    padding: 2.25rem 2rem 2rem;
-    border-right: 1px solid var(--gray-a4);
+  .gated-form {
+    padding: 3rem 2.75rem 2rem;
   }
 }
 
-.locker-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.locker-brand__mark {
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 999px;
-  background:
-    linear-gradient(145deg, var(--accent-9), var(--accent-11));
-  box-shadow: 0 0 0 3px var(--accent-a3);
-}
-
-.locker-side__intro {
+.gated-form__top {
   display: grid;
-  gap: 0.45rem;
-  margin-top: 0.25rem;
+  gap: 0.65rem;
+  margin-bottom: 2rem;
 }
 
-.locker-side__sub {
-  max-width: 28rem;
+.gated-logo {
+  letter-spacing: -0.03em;
+  color: #fff;
 }
 
-.locker-side__meta {
+.gated-title {
+  margin-top: 0.75rem;
+  letter-spacing: -0.03em;
+}
+
+.gated-lede {
+  max-width: 22rem;
+  line-height: 1.45;
+}
+
+.gated-form__body {
+  display: grid;
+  gap: 1.35rem;
+  flex: 1;
+  align-content: start;
+}
+
+.gated-item {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.gated-item__bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  min-height: 1.5rem;
 }
 
-.locker-form {
+.gated-input {
+  width: 100%;
+}
+
+.gated-add {
+  width: fit-content;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.gated-form__rule {
+  width: 100%;
+  margin-top: 1.75rem;
+}
+
+.gated-form__foot {
+  margin-top: 0.85rem;
+}
+
+/* —— Right embed (“flower bit”): padded inset panel, not full bleed —— */
+.gated-embed {
   display: grid;
-  gap: 0.75rem;
-  flex: 1;
-  align-content: start;
-  overflow: auto;
-  padding-right: 0.15rem;
-  max-height: min(46vh, 420px);
+  place-items: stretch;
+  padding: 1.1rem;
+  box-sizing: border-box;
+  background: #0c0e14;
+  min-height: 380px;
 }
 
 @media (min-width: 900px) {
-  .locker-form {
+  .gated-embed {
+    padding: 1.25rem;
+  }
+}
+
+.gated-embed__panel {
+  border-radius: 1.15rem;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 100%;
+  /* Tall inset panel — portrait, not strict 9:16 phone chrome */
+  aspect-ratio: 4 / 5;
+  width: 100%;
+  max-height: min(560px, calc(100vh - 6rem));
+  justify-self: stretch;
+  align-self: center;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+@media (min-width: 900px) {
+  .gated-embed__panel {
+    aspect-ratio: auto;
+    height: 100%;
     max-height: none;
   }
 }
 
-.locker-row {
-  display: grid !important;
-  gap: 0.85rem;
-}
-
-.locker-row__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.locker-row__title {
-  display: grid;
-  gap: 0.1rem;
-  min-width: 0;
-}
-
-.locker-row__fields {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.locker-field {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.locker-sep {
-  width: 100%;
-  margin-top: auto;
-}
-
-.locker-add {
-  width: 100%;
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-}
-
-/* —— Right: inset rounded panel (like the reference feature panel) —— */
-.locker-panel-wrap {
-  display: grid;
-  place-items: center;
-  padding: 1.25rem;
-  box-sizing: border-box;
-  background: var(--gray-1);
-  min-height: 420px;
-}
-
-@media (min-width: 900px) {
-  .locker-panel-wrap {
-    padding: 1.5rem;
-  }
-}
-
-.locker-panel {
-  /* Inset 9:16-ish panel — does not fill the frame */
-  width: min(100%, 320px);
-  aspect-ratio: 9 / 16;
-  max-height: min(560px, calc(100vh - 7rem));
-  border-radius: 1.75rem;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--gray-a5);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 18px 40px -20px rgba(0, 0, 0, 0.55);
-  display: grid;
-}
-
-.locker-panel__wash {
-  position: absolute;
-  inset: -30% -20% auto;
-  height: 58%;
-  background:
-    radial-gradient(
-      closest-side,
-      color-mix(in oklab, var(--accent-9) 35%, transparent),
-      transparent 72%
-    );
-  pointer-events: none;
-}
-
-.locker-panel__inner {
+.gated-embed__content {
   position: relative;
   z-index: 1;
+  height: 100%;
   display: grid;
   align-content: center;
   justify-items: center;
   gap: 0.7rem;
-  padding: 1.75rem 1.35rem;
+  padding: 2rem 1.5rem;
   box-sizing: border-box;
-  height: 100%;
-  color: white;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 10, 18, 0.15) 0%,
+    rgba(7, 10, 18, 0.55) 100%
+  );
 }
 
-.locker-panel__badge {
+.gated-embed__icon {
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 999px;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #fff;
-  margin-bottom: 0.15rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  margin-bottom: 0.2rem;
 }
 
-.locker-panel__copy {
-  max-width: 15.5rem;
+.gated-embed__copy {
+  max-width: 16rem;
   color: rgba(255, 255, 255, 0.72) !important;
 }
 
-.locker-panel__actions {
+.gated-embed__actions {
   display: grid;
   gap: 0.55rem;
-  width: 100%;
-  margin-top: 0.85rem;
+  width: min(100%, 16.5rem);
+  margin-top: 0.9rem;
 }
 
-.locker-panel__cta {
+.gated-embed__cta {
   width: 100%;
 }
