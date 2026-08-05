@@ -261,13 +261,45 @@ function FieldLabel({ children }: { children: ReactNode }) {
   )
 }
 
+function niceMax(value: number) {
+  if (value <= 0) return 1
+  const exp = Math.pow(10, Math.floor(Math.log10(value)))
+  const n = value / exp
+  const nice = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10
+  return nice * exp
+}
+
+function linePath(
+  points: { x: number; y: number }[],
+): string {
+  if (!points.length) return ''
+  return points
+    .map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+    .join(' ')
+}
+
 function ViewsClicksChart({ series }: { series: DayStat[] }) {
-  const max = Math.max(...series.map((d) => d.views), 1)
-  const w = 320
-  const h = 140
-  const pad = 18
-  const gap = 10
-  const barW = (w - pad * 2 - gap * (series.length - 1)) / series.length
+  const w = 360
+  const h = 168
+  const left = 8
+  const right = 36
+  const top = 12
+  const bottom = 28
+  const plotW = w - left - right
+  const plotH = h - top - bottom
+  const maxVal = niceMax(Math.max(...series.map((d) => d.views), 1))
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => Math.round(maxVal * t))
+
+  const toPoint = (value: number, index: number) => {
+    const x =
+      left +
+      (series.length === 1 ? plotW / 2 : (index / (series.length - 1)) * plotW)
+    const y = top + plotH - (value / maxVal) * plotH
+    return { x, y }
+  }
+
+  const viewPts = series.map((d, i) => toPoint(d.views, i))
+  const clickPts = series.map((d, i) => toPoint(d.clicks, i))
 
   return el(
     'svg',
@@ -277,42 +309,58 @@ function ViewsClicksChart({ series }: { series: DayStat[] }) {
       role: 'img',
       'aria-label': 'Views and clicks over the last 7 days',
     },
-    ...series.flatMap((d, i) => {
-      const x = pad + i * (barW + gap)
-      const viewsH = Math.max(4, (d.views / max) * (h - 36))
-      const clicksH = Math.max(3, (d.clicks / max) * (h - 36))
+    ...ticks.map((tick, i) => {
+      const y = top + plotH - (tick / maxVal) * plotH
       return [
-        el('rect', {
-          key: `${d.label}-v`,
-          x,
-          y: h - 22 - viewsH,
-          width: barW * 0.55,
-          height: viewsH,
-          rx: 3,
-          className: 'gated-chart__views',
-        }),
-        el('rect', {
-          key: `${d.label}-c`,
-          x: x + barW * 0.45,
-          y: h - 22 - clicksH,
-          width: barW * 0.55,
-          height: clicksH,
-          rx: 3,
-          className: 'gated-chart__clicks',
+        el('line', {
+          key: `g-${i}`,
+          x1: left,
+          x2: w - right,
+          y1: y,
+          y2: y,
+          className: 'gated-chart__grid',
         }),
         el(
           'text',
           {
-            key: `${d.label}-t`,
-            x: x + barW / 2,
-            y: h - 6,
-            textAnchor: 'middle',
-            className: 'gated-chart__label',
+            key: `yt-${i}`,
+            x: w - right + 6,
+            y: y + 3,
+            className: 'gated-chart__axis',
           },
-          d.label,
+          String(tick),
         ),
       ]
     }),
+    el('path', {
+      d: linePath(viewPts),
+      className: 'gated-chart__line gated-chart__line--views',
+      fill: 'none',
+    }),
+    el('path', {
+      d: linePath(clickPts),
+      className: 'gated-chart__line gated-chart__line--clicks',
+      fill: 'none',
+    }),
+    el(
+      'text',
+      {
+        x: left,
+        y: h - 6,
+        className: 'gated-chart__axis',
+      },
+      series[0]?.label ?? '',
+    ),
+    el(
+      'text',
+      {
+        x: w - right,
+        y: h - 6,
+        textAnchor: 'end',
+        className: 'gated-chart__axis',
+      },
+      series[series.length - 1]?.label ?? '',
+    ),
   )
 }
 
@@ -901,70 +949,71 @@ export function ContentLockerHome() {
           el(
             'div',
             { className: 'gated-stat' },
-            el(EyeFilled20, { className: 'gated-stat__icon' }),
-            el('div', null,
+            el(
+              'div',
+              { className: 'gated-stat__top' },
               el(Text, { size: '1', color: 'gray' }, 'Views'),
-              el(Text, { size: '5', weight: 'bold' }, String(selectedVault.views)),
+              el(EyeFilled20, { className: 'gated-stat__icon' }),
             ),
+            el(Text, { size: '5', weight: 'bold' }, String(selectedVault.views)),
           ),
           el(
             'div',
             { className: 'gated-stat' },
-            el(Stats20, { className: 'gated-stat__icon' }),
-            el('div', null,
+            el(
+              'div',
+              { className: 'gated-stat__top' },
               el(Text, { size: '1', color: 'gray' }, 'Clicks'),
-              el(Text, { size: '5', weight: 'bold' }, String(selectedVault.clicks)),
+              el(Stats20, { className: 'gated-stat__icon' }),
             ),
+            el(Text, { size: '5', weight: 'bold' }, String(selectedVault.clicks)),
           ),
           el(
             'div',
             { className: 'gated-stat' },
-            el(LockFilled20, { className: 'gated-stat__icon' }),
-            el('div', null,
+            el(
+              'div',
+              { className: 'gated-stat__top' },
               el(Text, { size: '1', color: 'gray' }, 'Unlocks'),
-              el(Text, { size: '5', weight: 'bold' }, String(selectedVault.unlocks)),
+              el(LockFilled20, { className: 'gated-stat__icon' }),
             ),
+            el(Text, { size: '5', weight: 'bold' }, String(selectedVault.unlocks)),
           ),
         ),
         el(
           'div',
           { className: 'gated-detail__chart-wrap' },
           el(
-            Text,
-            { size: '2', weight: 'medium' },
-            'Views & clicks · last 7 days',
-          ),
-          el(
             'div',
-            { className: 'gated-chart-legend' },
-            el('span', { className: 'gated-chart-legend__item gated-chart-legend__item--views' }, 'Views'),
-            el('span', { className: 'gated-chart-legend__item gated-chart-legend__item--clicks' }, 'Clicks'),
-          ),
-          el(ViewsClicksChart, { series: selectedVault.series }),
-        ),
-        el(
-          'div',
-          { className: 'gated-detail__info' },
-          el(Text, { size: '1', color: 'gray' }, 'Destination'),
-          el(
-            Text,
-            { size: '2' },
-            `${selectedVault.destinationLabel} → ${
-              selectedVault.destinationUrl.trim() || 'No URL set'
-            }`,
-          ),
-          el(Text, { size: '1', color: 'gray', className: 'gated-detail__steps-label' }, 'Unlock steps'),
-          ...selectedVault.actions.map((action, index) => {
-            const preset = getPreset(action.presetId)
-            if (!preset) return null
-            return el(
+            { className: 'gated-detail__chart-head' },
+            el(
               Text,
-              { key: action.id, size: '2' },
-              `${index + 1}. ${preset.platform} — ${preset.label}${
-                action.value.trim() ? ` (@${action.value.replace(/^@/, '')})` : ''
-              }`,
-            )
-          }),
+              { size: '2', weight: 'medium' },
+              'Views & clicks',
+            ),
+            el(
+              'div',
+              { className: 'gated-chart-legend' },
+              el(
+                'span',
+                {
+                  className:
+                    'gated-chart-legend__item gated-chart-legend__item--views',
+                },
+                'Views',
+              ),
+              el(
+                'span',
+                {
+                  className:
+                    'gated-chart-legend__item gated-chart-legend__item--clicks',
+                },
+                'Clicks',
+              ),
+            ),
+          ),
+          el(Text, { size: '1', color: 'gray' }, 'Last 7 days'),
+          el(ViewsClicksChart, { series: selectedVault.series }),
         ),
         el(
           'div',
