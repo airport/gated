@@ -1,7 +1,14 @@
 <script setup lang="ts">
-await navigateTo('/home', { replace: true })
+await navigateTo('/home')
 </script>
 
 <template>
-  <div />
+  <div class="boot" />
 </template>
+
+<style scoped>
+.boot {
+  min-height: 100vh;
+  background: #0a0a0a;
+}
+</style>

@@ -25,7 +25,6 @@ function frostedUiBundlePlugin(): Plugin {
     async load(id) {
       if (id !== resolvedId) return
 
-      // Rebuild when the barrel entry changes (dev HMR / edits).
       const { statSync } = await import('node:fs')
       const mtime = statSync(frostedEntry).mtimeMs
       if (!cached || mtime > cachedAt) {
@@ -63,22 +62,27 @@ function frostedUiBundlePlugin(): Plugin {
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  // SPA mode — React islands + avoids Safari DevTools/hydration 500s
+  ssr: false,
+  devtools: { enabled: false },
 
   css: ['~/assets/css/main.css'],
 
   vite: {
     plugins: [tailwindcss(), frostedUiBundlePlugin()],
     optimizeDeps: {
-      // React comes from virtual:frosted-ui — don't prebundle a second copy
       exclude: ['react', 'react-dom', 'frosted-ui'],
-    },
-    ssr: {
-      external: ['frosted-ui', '@frosted-ui/icons', 'react', 'react-dom'],
     },
   },
 
   build: {
     transpile: ['@frosted-ui/icons'],
+  },
+
+  app: {
+    head: {
+      title: 'Gated',
+      meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
+    },
   },
 })

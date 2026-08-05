@@ -1,14 +1,13 @@
 <template>
   <div class="app-root">
-    <NuxtRouteAnnouncer />
-    <NuxtLayout>
-      <NuxtPage />
-    </NuxtLayout>
+    <NuxtPage />
   </div>
 </template>
 
 <style scoped>
 .app-root {
   min-height: 100vh;
+  height: 100%;
+  background: #0a0a0a;
 }
 </style>
