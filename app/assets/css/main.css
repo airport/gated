@@ -43,6 +43,15 @@ body {
 }
 
 /* —— Left: independent scroll —— */
+.gated-form-col {
+  position: relative;
+  height: 100%;
+  max-height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+  background: #0a0a0a;
+}
+
 .gated-form {
   display: flex;
   flex-direction: column;
@@ -52,13 +61,12 @@ body {
   box-sizing: border-box;
   background: #0a0a0a;
   height: 100%;
-  max-height: 100vh;
+  max-height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  position: relative;
 }
 
 .gated-form::-webkit-scrollbar {
@@ -73,21 +81,22 @@ body {
   max-width: 26rem;
   width: 100%;
   margin: 0 auto;
-  padding-bottom: 3.25rem;
+  padding-bottom: 3.5rem;
 }
 
+/* Pinned to the column viewport — outside the scroll element */
 .gated-form__fade {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 3.25rem;
+  height: 3.5rem;
   pointer-events: none;
-  z-index: 5;
+  z-index: 6;
   background: linear-gradient(
     180deg,
     rgba(10, 10, 10, 0) 0%,
-    rgba(10, 10, 10, 0.55) 40%,
+    rgba(10, 10, 10, 0.65) 45%,
     #0a0a0a 100%
   );
 }
