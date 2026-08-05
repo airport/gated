@@ -19,7 +19,7 @@ import {
   GearFilled20,
   YoutubeFilled20,
   InstagramFilled20,
-  TwitterFilled20,
+  XDotComFilled20,
   TiktokFilled20,
   DiscordFilled20,
   Twitch20,
@@ -62,7 +62,7 @@ const PLATFORM_ICONS: Record<
 > = {
   youtube: YoutubeFilled20,
   instagram: InstagramFilled20,
-  x: TwitterFilled20,
+  x: XDotComFilled20,
   tiktok: TiktokFilled20,
   discord: DiscordFilled20,
   twitch: Twitch20,
@@ -96,6 +96,31 @@ const DEFAULT_ACTIONS: LockerAction[] = [
   { id: uid(), presetId: 'youtube:subscribe', value: '' },
   { id: uid(), presetId: 'discord:join', value: '' },
 ]
+
+const DESTINATION_LABELS = [
+  'Continue',
+  'Buy now',
+  'Get access',
+  'Unlock',
+  'Unlock content',
+  'Claim reward',
+  'Claim now',
+  'Download',
+  'Join now',
+  'View content',
+  'Get started',
+  'Open link',
+  'Access now',
+  'Enter',
+  'Proceed',
+  'Redeem',
+  'Get exclusive access',
+  'Watch now',
+  'Listen now',
+  'Start free',
+  'Upgrade',
+  'Subscribe',
+] as const
 
 const PANEL_CANVAS =
   'radial-gradient(120% 80% at 50% 0%, #3b82f6 0%, #1e3a8a 34%, #0b1224 70%, #070a12 100%)'
@@ -206,7 +231,7 @@ export function ContentLockerHome() {
   const [description, setDescription] = useState(
     'Complete a step below to unlock.',
   )
-  const [destinationLabel, setDestinationLabel] = useState('Continue')
+  const [destinationLabel, setDestinationLabel] = useState<string>('Continue')
   const [destinationUrl, setDestinationUrl] = useState('')
   const [slugTouched, setSlugTouched] = useState(false)
 
@@ -242,7 +267,7 @@ export function ContentLockerHome() {
   const previewDescription =
     description.trim() || 'Complete a step below to unlock.'
   const previewSlug = slugify(slug) || 'locker'
-  const previewDestinationLabel = destinationLabel.trim() || 'Continue'
+  const previewDestinationLabel = destinationLabel || 'Continue'
   const previewDestinationHref = normalizeUrl(destinationUrl)
 
   const homeContent = el(
@@ -324,14 +349,22 @@ export function ContentLockerHome() {
         { className: 'gated-field' },
         el(FieldLabel, null, 'Destination button'),
         el(
-          TextField.Root,
-          { size: '3', variant: 'surface' },
-          el(TextField.Input, {
+          Select.Root,
+          {
             value: destinationLabel,
-            placeholder: 'Continue',
-            onChange: (e: { target: { value: string } }) =>
-              setDestinationLabel(e.target.value),
+            onValueChange: (value: string) => setDestinationLabel(value),
+          },
+          el(Select.Trigger, {
+            placeholder: 'Choose button text…',
+            className: 'gated-picker__trigger',
           }),
+          el(
+            Select.Content,
+            { position: 'popper', className: 'gated-select-content' },
+            ...DESTINATION_LABELS.map((label) =>
+              el(Select.Item, { key: label, value: label }, label),
+            ),
+          ),
         ),
         el(
           TextField.Root,
