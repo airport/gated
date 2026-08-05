@@ -51,7 +51,7 @@ const NAV_ITEMS: {
   Icon: ComponentType<{ className?: string }>
 }[] = [
   { id: 'home', label: 'Home', Icon: HomeFilled20 },
-  { id: 'vault', label: 'Vault', Icon: WalletFilled20 },
+  { id: 'vault', label: 'Vault', Icon: LockFilled20 },
   { id: 'payouts', label: 'Payouts', Icon: Payout20 },
   { id: 'settings', label: 'Settings', Icon: GearFilled20 },
 ]
