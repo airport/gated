@@ -186,7 +186,8 @@ body {
 
 .gated-embed__panel {
   border-radius: 1.25rem;
-  background: #070a12;
+  background-size: cover;
+  background-position: center;
   position: relative;
   overflow: hidden;
   /* Fill the whole right inset area again — do not shrink to a phone card */
@@ -195,91 +196,6 @@ body {
   min-height: 0;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   display: grid;
-  isolation: isolate;
-}
-
-.gated-embed__glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(48px);
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-
-.gated-embed__glow--a {
-  width: 70%;
-  height: 55%;
-  top: -18%;
-  left: 15%;
-  background: radial-gradient(circle, #3b82f6 0%, transparent 68%);
-  opacity: 0.85;
-  animation: gated-glow-a 14s ease-in-out infinite;
-}
-
-.gated-embed__glow--b {
-  width: 55%;
-  height: 50%;
-  bottom: -12%;
-  right: -8%;
-  background: radial-gradient(circle, #1d4ed8 0%, transparent 70%);
-  opacity: 0.7;
-  animation: gated-glow-b 18s ease-in-out infinite;
-}
-
-.gated-embed__glow--c {
-  width: 40%;
-  height: 40%;
-  top: 38%;
-  left: -10%;
-  background: radial-gradient(circle, #60a5fa 0%, transparent 72%);
-  opacity: 0.45;
-  animation: gated-glow-c 12s ease-in-out infinite;
-}
-
-@keyframes gated-glow-a {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-    opacity: 0.8;
-  }
-  50% {
-    transform: translate3d(-8%, 10%, 0) scale(1.12);
-    opacity: 1;
-  }
-}
-
-@keyframes gated-glow-b {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-    opacity: 0.65;
-  }
-  50% {
-    transform: translate3d(-12%, -14%, 0) scale(1.18);
-    opacity: 0.9;
-  }
-}
-
-@keyframes gated-glow-c {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-    opacity: 0.4;
-  }
-  40% {
-    transform: translate3d(18%, -8%, 0) scale(1.2);
-    opacity: 0.65;
-  }
-  70% {
-    transform: translate3d(6%, 12%, 0) scale(0.95);
-    opacity: 0.5;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .gated-embed__glow {
-    animation: none;
-  }
 }
 
 .gated-embed__content {

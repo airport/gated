@@ -81,6 +81,9 @@ const DEFAULT_ACTIONS: LockerAction[] = [
   { id: uid(), presetId: 'discord:join', value: '' },
 ]
 
+const PANEL_CANVAS =
+  'radial-gradient(120% 80% at 50% 0%, #3b82f6 0%, #1e3a8a 34%, #0b1224 70%, #070a12 100%)'
+
 function normalizeUrl(input: string): string {
   const v = input.trim()
   if (!v) return ''
@@ -435,19 +438,10 @@ export function ContentLockerHome() {
         { className: 'gated-embed', 'aria-label': 'Locker preview' },
         el(
           'div',
-          { className: 'gated-embed__panel' },
-          el('div', {
-            className: 'gated-embed__glow gated-embed__glow--a',
-            'aria-hidden': true,
-          }),
-          el('div', {
-            className: 'gated-embed__glow gated-embed__glow--b',
-            'aria-hidden': true,
-          }),
-          el('div', {
-            className: 'gated-embed__glow gated-embed__glow--c',
-            'aria-hidden': true,
-          }),
+          {
+            className: 'gated-embed__panel',
+            style: { backgroundImage: PANEL_CANVAS },
+          },
           el(
             'div',
             { className: 'gated-embed__content' },
