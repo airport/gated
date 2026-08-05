@@ -12,6 +12,8 @@ import {
   Select,
   Trash16,
   LockFilled20,
+  LinkFilled20,
+  ArrowRightFilled20,
   YoutubeFilled20,
   InstagramFilled20,
   TwitterFilled20,
@@ -79,8 +81,11 @@ const DEFAULT_ACTIONS: LockerAction[] = [
   { id: uid(), presetId: 'discord:join', value: '' },
 ]
 
-const PANEL_CANVAS =
-  'radial-gradient(120% 80% at 50% 0%, #3b82f6 0%, #1e3a8a 34%, #0b1224 70%, #070a12 100%)'
+function normalizeUrl(input: string): string {
+  const v = input.trim()
+  if (!v) return ''
+  return v.startsWith('http://') || v.startsWith('https://') ? v : `https://${v}`
+}
 
 function BrandButton({
   preset,
@@ -106,6 +111,25 @@ function BrandButton({
   )
 }
 
+function DestinationButton({
+  label,
+  onClick,
+}: {
+  label: string
+  onClick: () => void
+}) {
+  return el(
+    'button',
+    {
+      type: 'button',
+      className: 'gated-destination-btn',
+      onClick,
+    },
+    el(ArrowRightFilled20, { className: 'gated-destination-btn__icon' }),
+    el('span', null, label),
+  )
+}
+
 function FieldLabel({ children }: { children: ReactNode }) {
   return el(
     Text,
@@ -120,6 +144,8 @@ export function ContentLockerHome() {
   const [description, setDescription] = useState(
     'Complete a step below to unlock.',
   )
+  const [destinationLabel, setDestinationLabel] = useState('Continue')
+  const [destinationUrl, setDestinationUrl] = useState('')
   const [slugTouched, setSlugTouched] = useState(false)
 
   const [actions, setActions] = useState<LockerAction[]>(DEFAULT_ACTIONS)
@@ -154,6 +180,8 @@ export function ContentLockerHome() {
   const previewDescription =
     description.trim() || 'Complete a step below to unlock.'
   const previewSlug = slugify(slug) || 'locker'
+  const previewDestinationLabel = destinationLabel.trim() || 'Continue'
+  const previewDestinationHref = normalizeUrl(destinationUrl)
 
   return el(
     Theme,
@@ -232,7 +260,7 @@ export function ContentLockerHome() {
               el(
                 Text,
                 { size: '1', color: 'gray', className: 'gated-slug-hint' },
-                `gated.app/${previewSlug}`,
+                `gated.to/${previewSlug}`,
               ),
             ),
             el(
@@ -249,6 +277,42 @@ export function ContentLockerHome() {
                 onChange: (e: { target: { value: string } }) =>
                   setDescription(e.target.value),
               }),
+            ),
+            el(
+              'div',
+              { className: 'gated-field' },
+              el(FieldLabel, null, 'Destination button'),
+              el(
+                TextField.Root,
+                { size: '3', variant: 'surface' },
+                el(TextField.Input, {
+                  value: destinationLabel,
+                  placeholder: 'Continue',
+                  onChange: (e: { target: { value: string } }) =>
+                    setDestinationLabel(e.target.value),
+                }),
+              ),
+              el(
+                TextField.Root,
+                { size: '3', variant: 'surface', className: 'gated-input' },
+                el(
+                  TextField.Slot,
+                  null,
+                  el(LinkFilled20, { className: 'gated-field-icon' }),
+                ),
+                el(TextField.Input, {
+                  value: destinationUrl,
+                  placeholder: 'https://example.com/reward',
+                  inputMode: 'url',
+                  onChange: (e: { target: { value: string } }) =>
+                    setDestinationUrl(e.target.value),
+                }),
+              ),
+              el(
+                Text,
+                { size: '1', color: 'gray', className: 'gated-slug-hint' },
+                'Shown after unlock steps — opens the reward URL.',
+              ),
             ),
           ),
 
@@ -371,10 +435,19 @@ export function ContentLockerHome() {
         { className: 'gated-embed', 'aria-label': 'Locker preview' },
         el(
           'div',
-          {
-            className: 'gated-embed__panel',
-            style: { backgroundImage: PANEL_CANVAS },
-          },
+          { className: 'gated-embed__panel' },
+          el('div', {
+            className: 'gated-embed__glow gated-embed__glow--a',
+            'aria-hidden': true,
+          }),
+          el('div', {
+            className: 'gated-embed__glow gated-embed__glow--b',
+            'aria-hidden': true,
+          }),
+          el('div', {
+            className: 'gated-embed__glow gated-embed__glow--c',
+            'aria-hidden': true,
+          }),
           el(
             'div',
             { className: 'gated-embed__content' },
@@ -423,6 +496,18 @@ export function ContentLockerHome() {
                     window.open(href, '_blank', 'noopener,noreferrer')
                   },
                 })
+              }),
+              el(DestinationButton, {
+                key: 'destination',
+                label: previewDestinationLabel,
+                onClick: () => {
+                  if (!previewDestinationHref) return
+                  window.open(
+                    previewDestinationHref,
+                    '_blank',
+                    'noopener,noreferrer',
+                  )
+                },
               }),
             ),
           ),

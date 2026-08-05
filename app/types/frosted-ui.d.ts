@@ -57,6 +57,8 @@ declare module 'virtual:frosted-ui' {
     Trash20,
     Link16,
     Link20,
+    LinkFilled20,
+    ArrowRightFilled20,
     Lock20,
     Lock24,
     LockFilled20,

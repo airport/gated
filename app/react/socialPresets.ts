@@ -227,8 +227,11 @@ export function resolveDestination(preset: SocialPreset, value: string): string 
   if (!v) return ''
 
   switch (preset.id) {
-    case 'youtube:subscribe':
-      return `https://youtube.com/@${v}`
+    case 'youtube:subscribe': {
+      // Prompt the YouTube subscribe dialog when the channel opens.
+      const base = `https://youtube.com/@${v}`
+      return `${base}?sub_confirmation=1`
+    }
     case 'instagram:follow':
       return `https://instagram.com/${v}`
     case 'x:follow':

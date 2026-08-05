@@ -104,6 +104,11 @@ body {
   margin-top: 0.15rem;
 }
 
+.gated-field-icon {
+  color: var(--gray-9);
+  display: block;
+}
+
 .gated-section-label {
   margin-bottom: 0.15rem;
 }
@@ -181,8 +186,7 @@ body {
 
 .gated-embed__panel {
   border-radius: 1.25rem;
-  background-size: cover;
-  background-position: center;
+  background: #070a12;
   position: relative;
   overflow: hidden;
   /* Fill the whole right inset area again — do not shrink to a phone card */
@@ -191,6 +195,91 @@ body {
   min-height: 0;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   display: grid;
+  isolation: isolate;
+}
+
+.gated-embed__glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.gated-embed__glow--a {
+  width: 70%;
+  height: 55%;
+  top: -18%;
+  left: 15%;
+  background: radial-gradient(circle, #3b82f6 0%, transparent 68%);
+  opacity: 0.85;
+  animation: gated-glow-a 14s ease-in-out infinite;
+}
+
+.gated-embed__glow--b {
+  width: 55%;
+  height: 50%;
+  bottom: -12%;
+  right: -8%;
+  background: radial-gradient(circle, #1d4ed8 0%, transparent 70%);
+  opacity: 0.7;
+  animation: gated-glow-b 18s ease-in-out infinite;
+}
+
+.gated-embed__glow--c {
+  width: 40%;
+  height: 40%;
+  top: 38%;
+  left: -10%;
+  background: radial-gradient(circle, #60a5fa 0%, transparent 72%);
+  opacity: 0.45;
+  animation: gated-glow-c 12s ease-in-out infinite;
+}
+
+@keyframes gated-glow-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate3d(-8%, 10%, 0) scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes gated-glow-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translate3d(-12%, -14%, 0) scale(1.18);
+    opacity: 0.9;
+  }
+}
+
+@keyframes gated-glow-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translate3d(18%, -8%, 0) scale(1.2);
+    opacity: 0.65;
+  }
+  70% {
+    transform: translate3d(6%, 12%, 0) scale(0.95);
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gated-embed__glow {
+    animation: none;
+  }
 }
 
 .gated-embed__content {
@@ -249,7 +338,7 @@ body {
   width: min(100%, 20rem);
   align-content: start;
   flex: 0 1 auto;
-  max-height: min(42vh, 280px);
+  max-height: min(48vh, 320px);
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
@@ -281,5 +370,35 @@ body {
 }
 
 .gated-brand-btn__icon {
+  flex-shrink: 0;
+}
+
+.gated-destination-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.7rem;
+  padding: 0.8rem 1rem;
+  font: 600 14px/1.2 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  cursor: pointer;
+  color: #0b1224;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  transition: filter 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.28);
+  margin-top: 0.15rem;
+}
+
+.gated-destination-btn:hover {
+  filter: brightness(1.04);
+}
+
+.gated-destination-btn:active {
+  transform: translateY(1px);
+}
+
+.gated-destination-btn__icon {
   flex-shrink: 0;
 }
