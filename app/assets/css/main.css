@@ -239,28 +239,6 @@ body {
   width: 100%;
 }
 
-.gated-form__footer {
-  padding-top: 2.75rem;
-  position: sticky;
-  bottom: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(10, 10, 10, 0) 0%,
-    rgba(10, 10, 10, 0.82) 42%,
-    #0a0a0a 78%
-  );
-  padding-bottom: 0.35rem;
-  max-width: 26rem;
-  width: 100%;
-  margin: 0 auto;
-  z-index: 3;
-  pointer-events: none;
-}
-
-.gated-form__footer > * {
-  pointer-events: auto;
-}
-
 /* Tight prefix → text for / @ and leading icons */
 .gated-form .fui-TextFieldSlot {
   padding-left: 0.75rem;

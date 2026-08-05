@@ -567,12 +567,6 @@ export function ContentLockerHome() {
           ),
           pageContent,
         ),
-
-        el(
-          'div',
-          { className: 'gated-form__footer' },
-          el(Text, { size: '1', color: 'gray' }, 'Design only — auth later'),
-        ),
       ),
 
       el(
