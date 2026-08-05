@@ -15,7 +15,7 @@ import {
   LinkFilled20,
   ArrowRightFilled20,
   HomeFilled20,
-  Payout20,
+  MoneyReceiptFilled20,
   GearFilled20,
   YoutubeFilled20,
   InstagramFilled20,
@@ -52,7 +52,7 @@ const NAV_ITEMS: {
 }[] = [
   { id: 'home', label: 'Home', Icon: HomeFilled20 },
   { id: 'vault', label: 'Vault', Icon: LockFilled20 },
-  { id: 'payouts', label: 'Payouts', Icon: Payout20 },
+  { id: 'payouts', label: 'Payouts', Icon: MoneyReceiptFilled20 },
   { id: 'settings', label: 'Settings', Icon: GearFilled20 },
 ]
 
